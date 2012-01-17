@@ -33,7 +33,7 @@ namespace SocketIOClient.Eventing
 			Action<dynamic> target = null;
 			if (ackId.HasValue)
 			{
-				if (this.callBackRegistry.TryRemove(ackId.Value, out target))
+				if (this.callBackRegistry.TryRemove(ackId.Value, out target)) // use TryRemove - callbacks are one-shot event registrations
 				{
 					target.BeginInvoke(value, target.EndInvoke, null);
 				}
@@ -59,7 +59,7 @@ namespace SocketIOClient.Eventing
 		public void InvokeOnEvent(string eventName, IMessage value)
 		{
 			Action<IMessage> target;
-			if (this.eventNameRegistry.TryRemove(eventName, out target))
+			if (this.eventNameRegistry.TryGetValue(eventName, out target)) // use TryGet - do not destroy event name registration
 				target.BeginInvoke(value, target.EndInvoke, null);
 		}
 	
