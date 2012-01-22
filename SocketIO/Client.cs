@@ -28,7 +28,7 @@ namespace SocketIOClient
 		protected WebSocket wsClient;
 		protected RegistrationManager registrationManager;  // allow registration of dynamic events (event names) for client actions
 		protected WebSocketVersion SocketVersion = WebSocketVersion.Rfc6455 ;
-		protected List<KeyValuePair<string, string>> cookies;
+		
 
 		// Events
 		/// <summary>
@@ -83,34 +83,13 @@ namespace SocketIOClient
 			}
 		}
 
-		/// <summary>
-		/// <para>State of the constructor parameter indicating if client connection should ignore current proxy setting</para>
-		/// </summary>
-		public bool? DisableProxyDetection { get; private set; }
-
 		// Constructors
 		public Client(string url )
-			: this(url, new List<KeyValuePair<string, string>>(), WebSocketVersion.Rfc6455, false)
+			: this(url,  WebSocketVersion.Rfc6455)
 		{
 		}
-		public Client(string url, bool disableProxyDetection)
-			: this(url, new List<KeyValuePair<string, string>>(), WebSocketVersion.Rfc6455, disableProxyDetection)
-		{
-		}
-		public Client(string url, WebSocketVersion socketVersion, bool disableProxyDetection = false)
-			: this(url, new List<KeyValuePair<string, string>>(), socketVersion, disableProxyDetection)
-		{
-		}
-		public Client(string url, List<KeyValuePair<string,string>> cookies)
-			: this(url, cookies, WebSocketVersion.DraftHybi10, false)
-		{
-		}
-		public Client (string url, List<KeyValuePair<string,string>> cookies, WebSocketVersion socketVersion) 
-			: this(url,cookies, socketVersion,false)
-		{
 
-		}
-		public Client(string url, List<KeyValuePair<string, string>> cookies, WebSocketVersion socketVersion, bool disableProxyDetection )
+		public Client(string url, WebSocketVersion socketVersion)
 		{
 			this.uri = new Uri(url);
 			if (this.uri.Scheme == Uri.UriSchemeHttps)
@@ -119,9 +98,7 @@ namespace SocketIOClient
 				throw new ArgumentException(this.LastErrorMessage);
 			}
 			
-			this.cookies = cookies;
 			this.SocketVersion = socketVersion;
-			this.DisableProxyDetection = disableProxyDetection;
 
 			this.registrationManager = new RegistrationManager();
 			this.outboundQueue = new BlockingCollection<string>(new ConcurrentQueue<string>());
@@ -148,7 +125,7 @@ namespace SocketIOClient
 				this.wsClient = new WebSocket(
 					string.Format("{0}://{1}:{2}/socket.io/1/websocket/{3}",wsScheme, uri.Host, uri.Port, this.HandShake.SID), 
 					string.Empty,
-					this.cookies,
+					new List<KeyValuePair<string,string>>(),
 					this.SocketVersion);
 
 				this.wsClient.Opened += this.wsClient_OpenEvent;

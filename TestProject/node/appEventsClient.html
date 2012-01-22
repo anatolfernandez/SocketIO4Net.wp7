@@ -14,7 +14,7 @@
                     <textarea id="textArea1" cols="80" rows="25" title="Debug Messages"></textarea>
                 </div>
                 <div class="footer">
-                    <button type="button">
+                    <button  type="button" onclick='clearTextArea();'>
                         Clear</button>
                 </div>
             </div>
@@ -23,14 +23,6 @@
         <script src='http://code.jquery.com/jquery-1.7.1.min.js' type="text/javascript"></script>
         <script src='../scripts/dump.js' type='text/javascript'></script>
         <script>
-            function showMessage(label, data, levels) {
-                if (data === undefined)
-                    $('#textArea1').append(label + '\r\n' );
-                else
-                    $('#textArea1').append(label + dump(data, levels) + '\r\n');
-                console.log(data);
-            }
-
             $(document).ready(function () {
 
                 var socket = io.connect(); // default connection url to current page
@@ -49,6 +41,16 @@
                 });
             });
 
+            function clearTextArea() {
+                $('#textArea1').val("");
+            }
+            function showMessage(label, data, levels) {
+                if (data === undefined)
+                    $('#textArea1').append(label + '\r\n');
+                else
+                    $('#textArea1').append(label + dump(data, levels) + '\r\n');
+                console.log(data);
+            }
             
         </script>
 </body>
