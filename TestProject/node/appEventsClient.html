@@ -14,44 +14,45 @@
                     <textarea id="textArea1" cols="80" rows="25" title="Debug Messages"></textarea>
                 </div>
                 <div class="footer">
-                    <button  type="button" onclick='clearTextArea();'>
+                    <button type="button" onclick='clearTextArea();'>
                         Clear</button>
                 </div>
             </div>
         </div>
-        <script src='/socket.io/socket.io.js' type='text/javascript'></script>
-        <script src='http://code.jquery.com/jquery-1.7.1.min.js' type="text/javascript"></script>
-        <script src='../scripts/dump.js' type='text/javascript'></script>
-        <script>
-            $(document).ready(function () {
+    </div>
+    <script src='/socket.io/socket.io.js' type='text/javascript'></script>
+    <script src='http://code.jquery.com/jquery-1.7.1.min.js' type="text/javascript"></script>
+    <script src='../scripts/dump.js' type='text/javascript'></script>
+    <script>
+        $(document).ready(function () {
 
-                var socket = io.connect(); // default connection url to current page
+            var socket = io.connect(); // default connection url to current page
 
-                socket.on('connect', function () {
-                    showMessage('connect event');
-                    showMessage('sending \'event1\' event');
-                    socket.emit('event1', { Item: '1234', Code: 'C', Points: 1 });
-                });
-
-                socket.on('news', function (data) {
-                    showMessage('recv \'news\' event:', data, 2);
-
-                    showMessage('sending \'event2\' event');
-                    socket.emit('event2', { my: 'from a browser instance' });
-                });
+            socket.on('connect', function () {
+                showMessage('connect event');
+                showMessage('sending \'event1\' event');
+                socket.emit('event1', { Item: '1234', Code: 'C', Points: 1 });
             });
 
-            function clearTextArea() {
-                $('#textArea1').val("");
-            }
-            function showMessage(label, data, levels) {
-                if (data === undefined)
-                    $('#textArea1').append(label + '\r\n');
-                else
-                    $('#textArea1').append(label + dump(data, levels) + '\r\n');
-                console.log(data);
-            }
+            socket.on('news', function (data) {
+                showMessage('recv \'news\' event:', data, 2);
+
+                showMessage('sending \'event2\' event');
+                socket.emit('event2', { my: 'from a browser instance' });
+            });
+        });
+
+        function clearTextArea() {
+            $('#textArea1').val("");
+        }
+        function showMessage(label, data, levels) {
+            if (data === undefined)
+                $('#textArea1').append(label + '\r\n');
+            else
+                $('#textArea1').append(label + dump(data, levels) + '\r\n');
+            console.log(data);
+        }
             
-        </script>
+    </script>
 </body>
 </html>
