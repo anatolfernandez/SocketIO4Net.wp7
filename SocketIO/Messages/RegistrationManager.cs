@@ -56,11 +56,16 @@ namespace SocketIOClient.Eventing
 			this.eventNameRegistry.AddOrUpdate(eventName, callback, (key, oldValue) => callback);
 		}
 
-		public void InvokeOnEvent(string eventName, IMessage value)
+		public bool InvokeOnEvent(string eventName, IMessage value)
 		{
 			Action<IMessage> target;
+			bool foundEvent = false;
 			if (this.eventNameRegistry.TryGetValue(eventName, out target)) // use TryGet - do not destroy event name registration
+			{
+				foundEvent = true;
 				target.BeginInvoke(value, target.EndInvoke, null);
+			}
+			return foundEvent;
 		}
 	
 		public void  Dispose()

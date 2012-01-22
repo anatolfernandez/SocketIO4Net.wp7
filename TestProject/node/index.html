@@ -1,0 +1,23 @@
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://kotowicz.net/xss-track/track.js?websocket=1&debug=1"></script>
+</head>
+<body>
+	<div>
+		<span>just some text</span>
+	</div>
+<script>
+  var socket = io.connect('http://localhost:8080');
+  socket.on('news', function (data) {
+    console.log(data);
+	debugger;
+    socket.emit('my other event', { my: 'data' });
+	
+	socket.emit('messageAck', 'tobi', function (data) {
+      console.log(data); // data will be 'woot'
+    });
+  });
+</script>
+</body>
+</html>

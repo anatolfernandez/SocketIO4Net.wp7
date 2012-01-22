@@ -16,6 +16,7 @@ namespace SocketIOClient
 	/// <summary>
 	/// Class to emulate socket.io javascript client capabilities for .net classes
 	/// </summary>
+	/// <exception cref="ArgumentException" for wss or https urls />
 	public class Client : IDisposable, SocketIOClient.IClient
 	{
 		private Timer socketHeartBeatTimer; // HeartBeat timer 
@@ -30,7 +31,10 @@ namespace SocketIOClient
 		protected List<KeyValuePair<string, string>> cookies;
 
 		// Events
-		public event EventHandler Opened;
+		/// <summary>
+		/// Opened event comes from the underlying websocket client connection being opened.  This is not the same as socket.io returning the 'connect' event
+		/// </summary>
+		public event EventHandler Opened;  
 		public event EventHandler<MessageEventArgs> Message;
 		public event EventHandler ConnectionRetryAttempt;
 		/// <summary>
@@ -110,7 +114,10 @@ namespace SocketIOClient
 		{
 			this.uri = new Uri(url);
 			if (this.uri.Scheme == Uri.UriSchemeHttps)
-				throw new ArgumentException("They underlying WebSocket4Net library cannot support wss yet.");
+			{
+				this.LastErrorMessage = "They underlying WebSocket4Net library cannot support wss (yet).";
+				throw new ArgumentException(this.LastErrorMessage);
+			}
 			
 			this.cookies = cookies;
 			this.SocketVersion = socketVersion;
@@ -119,7 +126,6 @@ namespace SocketIOClient
 			this.registrationManager = new RegistrationManager();
 			this.outboundQueue = new BlockingCollection<string>(new ConcurrentQueue<string>());
 			this.dequeuOutBoundMsgTask = Task.Factory.StartNew(() => dequeuOutboundMessages(), TaskCreationOptions.LongRunning);
-			
 		}
 
 
@@ -130,16 +136,13 @@ namespace SocketIOClient
 		{
 			this.HandShake = this.requestHandshake(uri);// perform an initial HTTP request as a new, non-handshaken connection
 
-			if (this.HandShake == null || string.IsNullOrWhiteSpace(this.HandShake.SID))
+			if (this.HandShake == null || string.IsNullOrWhiteSpace(this.HandShake.SID) || this.HandShake.HadError)
 			{
-				string msg = string.Format("Error initializing handshake with {0}", uri.ToString());
-				this.OnErrorEvent(this, new ErrorEventArgs(msg,new Exception()) );
+				this.LastErrorMessage = string.Format("Error initializing handshake with {0}", uri.ToString());
+				this.OnErrorEvent(this, new ErrorEventArgs(this.LastErrorMessage, new Exception()));
 			}
 			else
 			{
-				this.OnMessageEvent(new ConnectMessage());
-				this.registrationManager.InvokeOnEvent("connect", null);
-
 				string wsScheme = (uri.Scheme == Uri.UriSchemeHttps ? "wss" : "ws");
 				
 				this.wsClient = new WebSocket(
@@ -168,7 +171,7 @@ namespace SocketIOClient
 
 			this.Connect();
 
-			bool connected = this.ConnectionOpenEvent.WaitOne(8000);
+			bool connected = this.ConnectionOpenEvent.WaitOne(4000);
 			Trace.WriteLine(string.Format("Connection successfull: {0}", connected));
 		}
 
@@ -251,13 +254,18 @@ namespace SocketIOClient
 				this.outboundQueue.Add(rawEncodedMessageText);
 		}
 
+		/// <summary>
+		/// if a registerd event name is found, don't raise the more generic Message event
+		/// </summary>
+		/// <param name="msg"></param>
 		protected void OnMessageEvent(IMessage msg)
 		{
+			bool skip = false;
 			if (!string.IsNullOrEmpty(msg.Event))
-				this.registrationManager.InvokeOnEvent(msg.Event, msg);
-
+				skip = this.registrationManager.InvokeOnEvent(msg.Event, msg); // 
+			
 			var handler = this.Message;
-			if (handler != null)
+			if (handler != null && !skip)
 				handler(this, new MessageEventArgs(msg));
 		}
 
@@ -323,18 +331,17 @@ namespace SocketIOClient
 			this.ConnectionOpenEvent.Set();
 
 			this.OnMessageEvent(new TextMessage() { Event = "open" });
-
 			if (this.Opened != null)
 			{
 				try { this.Opened(this, EventArgs.Empty); }
 				catch (Exception ex) { Trace.WriteLine(ex); }
 			}
-			
+
 		}
 		
 		private void wsClient_MessageReceived(object sender, MessageReceivedEventArgs e)
 		{
-			Console.WriteLine(string.Format("webSocket_OnMessage: {0}", e.Message));
+			Trace.WriteLine(string.Format("webSocket_OnMessage: {0}", e.Message));
 
 			IMessage iMsg = SocketIOClient.Messages.Message.Factory(e.Message);
 			switch (iMsg.MessageType)
@@ -442,21 +449,32 @@ namespace SocketIOClient
 		protected SocketIOHandshake requestHandshake(Uri uri)
 		{
 			string value = string.Empty;
+			string errorText = string.Empty;
+			SocketIOHandshake handshake = null;
+
 			using (WebClient client = new WebClient())
 			{
 				try
 				{
 					value = client.DownloadString(string.Format("http://{0}:{1}/socket.io/1/", uri.Host, uri.Port));
 					// 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
+					if (string.IsNullOrEmpty(value))
+						errorText = "Did not receive handshake string from server";
 				}
 				catch (Exception ex)
 				{
-					string errMsg = string.Format("Error getting handsake from Socket.IO host instance: {0}", ex.Message);
-					this.OnErrorEvent(this, new ErrorEventArgs(errMsg));
-
+					errorText = string.Format("Error getting handsake from Socket.IO host instance: {0}", ex.Message);
+					//this.OnErrorEvent(this, new ErrorEventArgs(errMsg));
 				}
 			}
-			SocketIOHandshake handshake = SocketIOHandshake.LoadFromString(value);
+			if (string.IsNullOrEmpty(errorText))
+				handshake = SocketIOHandshake.LoadFromString(value);
+			else
+			{
+				handshake = new SocketIOHandshake();
+				handshake.ErrorMessage = errorText;
+			}
+
 			return handshake;
 		}
 

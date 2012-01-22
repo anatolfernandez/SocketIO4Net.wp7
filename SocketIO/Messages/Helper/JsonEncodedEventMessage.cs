@@ -55,7 +55,7 @@ namespace SocketIOClient.Messages
             return items.AsEnumerable();
         }
 
-        public string ToJson()
+        public string ToJsonString()
         {
             return JsonConvert.SerializeObject(this, Formatting.None);
         }

@@ -42,7 +42,7 @@ namespace SocketIOClient.Messages
             this.Endpoint = endpoint;
 			
             this.JsonEncodedMessage = new JsonEncodedEventMessage(eventName, jsonObject);
-			this.MessageText = this.JsonEncodedMessage.ToJson();
+			this.MessageText = this.JsonEncodedMessage.ToJsonString();
         }
 
         public static EventMessage Deserialize(string rawMessage)

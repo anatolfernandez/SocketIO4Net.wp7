@@ -8,91 +8,84 @@ using System.Text.RegularExpressions;
 
 namespace TestProject
 {
+	/// <summary>
+	/// Example usage class for SocketIO4Net
+	/// </summary>
 	public class TestSocketIOClient
 	{
-		ManualResetEvent competeEvent = new ManualResetEvent(false);
-		ManualResetEvent waitEvent = new ManualResetEvent(false);
-		ManualResetEvent msgEvent = new ManualResetEvent(false);
-		ManualResetEvent sleepEvent = new ManualResetEvent(false);
-		public void Connect()
-		{
-			
-			string url = "http://127.0.0.1:8080/";
-			Client socket = new Client(url,true );
-			socket.Opened += new EventHandler(socket_Opened);
-			socket.Message += new EventHandler<MessageEventArgs>(socket_Message);
-			socket.SocketConnectionClosed += new EventHandler(socket_SocketConnectionClosed);
-			
-			socket.On("news", (data) =>
-			{
-				Trace.WriteLine(data.MessageText);
-				msgEvent.Set();
-			}); 
-			socket.On("open", (fn) => 
-			{
-				socket.Emit("my other event", new { Assessment = "1234", Response = "A", Points = 5 });
-				socket.Emit("my other event", new { Assessment = "5678", Response = "B", Points = 1 });
-				sleepEvent.WaitOne(30000);
-				socket.Emit("my other event", new { Assessment = "9123", Response = "C", Points = 1 });
-				sleepEvent.WaitOne(30000);
-				socket.Emit("my other event", new { Assessment = "9123", Response = "C", Points = 1 });
-
-			});
-			socket.Connect();
-			competeEvent.WaitOne(60000);
-			socket.Dispose();
-		}
 		Client socket;
-		public void TestSocket()
+		public void Execute()
 		{
-			string url = "http://127.0.0.1:8080/";
-			socket = new Client(url, true);
-			socket.Opened += new EventHandler(socket_Opened);
-			socket.Message += new EventHandler<MessageEventArgs>(socket_Message);
-			socket.SocketConnectionClosed += new EventHandler(socket_SocketConnectionClosed);
+			Console.WriteLine("Starting SocketIOClient...");
+			socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs / socket.io instance
+
+			socket.Opened += socket_Opened;
+			socket.Message += socket_OnMessage;
+			socket.SocketConnectionClosed +=socket_SocketConnectionClosed;
+			socket.Error += socket_Error;
+			
+			socket.On("connect", (fn) =>
+			{
+				Console.WriteLine("\r\nConnected event...");
+				Console.WriteLine("\tsending 'event1' event");
+				socket.Emit("event1", new { Item = "5678", Code = "A", Points = 1 });
+			});
 
 			socket.On("news", (data) =>
 			{
-				Console.WriteLine("news dynamic event:");
-				Console.WriteLine(data.JsonEncodedMessage.ToJson());
-			});
-			socket.On("connect", (f) =>
-			{
-				Console.WriteLine("Connect dynamic event");
-			});
-			socket.On("open", (f) =>
-			{
-				Console.WriteLine("Open dynamic event");
+				Console.WriteLine("\r\nrecv'd 'news' event: {0}",data.JsonEncodedMessage.ToJsonString());
+				Console.WriteLine("\tsending 'event2' event");
+                socket.Emit("event2", new { my = "from a .net client instance" });
 			});
 			
 			socket.Connect();
+		}
 
-			competeEvent.WaitOne(15000);
+		
+		public void SendEvent2()
+		{
+			string payload = string.Format("from .net client at {0}", DateTime.Now.ToLongTimeString());
+			socket.Emit("event2", new { my = payload });
+		}
+
+		void socket_Error(object sender, ErrorEventArgs e)
+		{
+			Console.WriteLine("socket client error:");
+			Console.WriteLine(e.Message);
 		}
 
 		void socket_SocketConnectionClosed(object sender, EventArgs e)
 		{
-			Console.WriteLine("SocketConnection was terminated!");
+			Console.WriteLine("WebSocketConnection was terminated!");
 		}
 
-		void socket_Message(object sender, MessageEventArgs e)
+		void socket_OnMessage(object sender, MessageEventArgs e)
 		{
-			//Console.WriteLine(e.Message.MessageText);
+			if (string.IsNullOrEmpty(e.Message.Event))
+				Console.WriteLine("socket_OnMessage: {0}",e.Message.MessageText);
+			else
+				Console.WriteLine("socket_OnMessage: {0} : {1}",e.Message.Event, e.Message.JsonEncodedMessage.ToJsonString());
 		}
 
 		void socket_Opened(object sender, EventArgs e)
 		{
-			waitEvent.Set();
-			socket.Emit("my other event", new { Assessment = "1234", Response = "A", Points = 5 });
-
-			socket.Emit("messageAck", new { hello = "ma" },
-				(data) =>
-				{
-					Console.WriteLine(string.Format("Ack Message received: {0} ",data.Args));
-					competeEvent.Set();
-				});
+			//socket.Emit("messageAck", new { hello = "ma" },
+			//    (data) =>
+			//    {
+			//        Console.WriteLine(string.Format("Ack Message received: {0} ",data.Args));
+			//    });
 		}
 
-		
+		public void Close()
+		{
+			if (this.socket != null)
+			{
+				socket.Opened -=socket_Opened;
+				socket.Message -= socket_OnMessage;
+				socket.SocketConnectionClosed -= socket_SocketConnectionClosed;
+				socket.Error -= socket_Error;
+				this.socket.Dispose(); // close & dispose of socket client
+			}
+		}
 	}
 }

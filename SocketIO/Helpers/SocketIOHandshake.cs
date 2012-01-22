@@ -9,7 +9,12 @@ namespace SocketIOClient
     {
         public string SID { get; set; }
         public int HeartbeatTimeout { get; set; }
+		public string ErrorMessage { get; set; }
+		public bool HadError
+		{
+			get { return !string.IsNullOrWhiteSpace(this.ErrorMessage); }
 
+		}
 		/// <summary>
 		/// The HearbeatInterval will be approxamately 20% faster than the Socket.IO service indicated was required
 		/// </summary>
@@ -23,6 +28,10 @@ namespace SocketIOClient
         public int ConnectionTimeout { get; set; }
         public List<string> Transports = new List<string>();
 
+		public SocketIOHandshake()
+		{
+
+		}
         public static SocketIOHandshake LoadFromString(string value)
         {
             SocketIOHandshake returnItem = new SocketIOHandshake();
