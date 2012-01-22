@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="node\startEvents.bat" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -106,16 +107,10 @@
       <Name>SocketIOClient</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="node\content\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="node\app.js" />
     <Content Include="node\appEvents.js" />
-    <Content Include="node\appNamespace.html" />
-    <Content Include="node\appNamespace.js" />
     <Content Include="node\appEventsClient.html" />
-    <Content Include="node\index.html" />
     <Content Include="node\scripts\client.js" />
     <Content Include="node\scripts\dump.js" />
   </ItemGroup>
