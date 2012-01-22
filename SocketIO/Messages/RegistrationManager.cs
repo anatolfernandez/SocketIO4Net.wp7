@@ -17,6 +17,7 @@ namespace SocketIOClient.Eventing
 			this.callBackRegistry = new ConcurrentDictionary<int, Action<dynamic>>();
 			this.eventNameRegistry = new ConcurrentDictionary<string, Action<IMessage>>();
 		}
+		
 		public void AddCallBack(IMessage message)
 		{
 			EventMessage eventMessage = message as EventMessage;

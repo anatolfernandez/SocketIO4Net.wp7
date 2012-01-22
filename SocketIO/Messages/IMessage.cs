@@ -19,6 +19,5 @@ namespace SocketIOClient.Messages
 		JsonEncodedEventMessage JsonEncodedMessage { get; }
 
         string Encoded { get; }
-        
     }
 }
