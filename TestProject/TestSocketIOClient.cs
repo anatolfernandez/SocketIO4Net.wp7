@@ -33,9 +33,11 @@ namespace TestProject
 
 			socket.On("news", (data) =>
 			{
-				Console.WriteLine("\r\nrecv'd 'news' event: {0}",data.JsonEncodedMessage.ToJsonString());
-				Console.WriteLine("\tsending 'event2' event");
-                socket.Emit("event2", new { my = "from a .net client instance" });
+				Console.WriteLine("Recv'd 'news' event! ");
+				Console.WriteLine("  raw message:      {0}", data.RawMessage);
+				Console.WriteLine("  string message:   {0}", data.MessageText);
+				Console.WriteLine("  json data string: {0}", data.JsonEncodedMessage.ToJsonString());
+				Console.WriteLine("  json raw:         {0}", data.JsonEncodedMessage.Args[0]);
 			});
 			
 			socket.Connect();
