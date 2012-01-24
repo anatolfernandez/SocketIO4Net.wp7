@@ -57,6 +57,12 @@ namespace SocketIOClient.Eventing
 			this.eventNameRegistry.AddOrUpdate(eventName, callback, (key, oldValue) => callback);
 		}
 
+		/// <summary>
+		/// If eventName is found, Executes Action<typeparamref name="T"/> asynchronously
+		/// </summary>
+		/// <param name="eventName"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		public bool InvokeOnEvent(string eventName, IMessage value)
 		{
 			Action<IMessage> target;

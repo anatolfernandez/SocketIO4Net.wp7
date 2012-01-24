@@ -153,6 +153,7 @@ namespace SocketIOClient
 		}
 
 		/// <summary>
+		/// <para>Asynchronously calls action delegate on event message</para>
 		/// <para>Mimicks the Socket.IO client 'socket.on('name',function(data){});' pattern</para>
 		/// <para>Reserved socket.io event names available: connect, disconnect, open, close, error, retry, reconnect  </para>
 		/// </summary>
