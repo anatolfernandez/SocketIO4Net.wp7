@@ -83,7 +83,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WebSocket4Net, Version=0.2.0.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+    <Reference Include="WebSocket4Net, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Reference\websocket4net\net40\WebSocket4Net.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -93,8 +94,10 @@
     <Compile Include="Helpers\SocketIOHandshake.cs" />
     <Compile Include="Helpers\SocketIOMessageTypes.cs" />
     <Compile Include="IClient.cs" />
+    <Compile Include="IEndPointClient.cs" />
     <Compile Include="MessageEventArgs.cs" />
     <Compile Include="Messages\AckMessage.cs" />
+    <Compile Include="Messages\DisconnectMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ConnectMessage.cs" />
     <Compile Include="Messages\ErrorMessage.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="Messages\NoopMessage.cs" />
     <Compile Include="Messages\RegistrationManager.cs" />
     <Compile Include="Messages\TextMessage.cs" />
+    <Compile Include="EndPointClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

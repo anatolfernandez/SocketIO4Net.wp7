@@ -56,17 +56,23 @@ namespace SocketIOClient.Eventing
 		{
 			this.eventNameRegistry.AddOrUpdate(eventName, callback, (key, oldValue) => callback);
 		}
-
+		public void AddOnEvent(string eventName, string endPoint, Action<IMessage> callback)
+		{
+			this.eventNameRegistry.AddOrUpdate(string.Format("{0}::{1}",eventName, endPoint), callback, (key, oldValue) => callback);
+		}
 		/// <summary>
-		/// If eventName is found, Executes Action<typeparamref name="T"/> asynchronously
+		/// If eventName is found, Executes Action delegate<typeparamref name="T"/> asynchronously
 		/// </summary>
 		/// <param name="eventName"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public bool InvokeOnEvent(string eventName, IMessage value)
+		public bool InvokeOnEvent(IMessage value)
 		{
 			Action<IMessage> target;
 			bool foundEvent = false;
+			string eventName = value.Event;
+			if (!string.IsNullOrWhiteSpace(value.Endpoint))
+				eventName = string.Format("{0}::{1}", value.Event, value.Endpoint);
 			if (this.eventNameRegistry.TryGetValue(eventName, out target)) // use TryGet - do not destroy event name registration
 			{
 				foundEvent = true;
@@ -74,7 +80,7 @@ namespace SocketIOClient.Eventing
 			}
 			return foundEvent;
 		}
-	
+		
 		public void  Dispose()
 		{
 			this.callBackRegistry.Clear();

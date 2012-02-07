@@ -22,35 +22,60 @@
     </div>
     <script src='/socket.io/socket.io.js' type='text/javascript'></script>
     <script src='http://code.jquery.com/jquery-1.7.1.min.js' type="text/javascript"></script>
-    <script src='../scripts/dump.js' type='text/javascript'></script>
     <script>
-        $(document).ready(function () {
+$(document).ready(function () {
 
-            var socket = io.connect(); // default connection url to current page
+    var socket = io.connect(); // default connection url to current page
 
-            socket.on('connect', function () {
-                showMessage('connect event');
-                showMessage('sending \'event1\' event');
-                socket.emit('event1', { Item: '1234', Code: 'C', Points: 1 });
-            });
+    socket.on('connect', function () {
+        showMessage('client is connected');
+        showMessage('sending [root].[partInfo] to server');
+        socket.emit('partInfo', { PartNumber: '1234', Code: 'C', Level: 1 });
+    });
+    socket.on('update', function (data) {
+        showMessage('recv [root].[update] : ', data);
+    });
+    socket.on('event', function (eventLog) {
+        showMessage('Arghhh - should not have received this message matey!');
+        showMessage('recv [root].[event]', eventLog);
+    });
+    socket.on('clientdisconnected', function () {
+        showMessage('recv [root].[userdisconnected]');
+    });
 
-            socket.on('news', function (data) {
-                showMessage('recv \'news\' event:', data, 2);
+    // *****************************************
+    // *************  logger namespace ***********
+    // *****************************************
+    var logger = io.connect('/logger'); // namespace 'logger'
 
-                showMessage('sending \'event2\' event');
-                socket.emit('event2', { my: 'from a browser instance' });
-            });
-        });
+    logger.on('connect', function () {
+        showMessage('client is connected namespace [logger]');
+    });
+    logger.on('event', function (eventLog) {
+        showMessage('recv [logger].[event] : ', eventLog);
+    });
+});
 
         function clearTextArea() {
             $('#textArea1').val("");
         }
-        function showMessage(label, data, levels) {
+
+        function showMessage(label, data) {
             if (data === undefined)
                 $('#textArea1').append(label + '\r\n');
             else
-                $('#textArea1').append(label + dump(data, levels) + '\r\n');
-            console.log(data);
+                $('#textArea1').append(label + JSON.stringify(data) + '\r\n');
+            $().log(label, data);
+        }
+        // log helper - in particular when IE does not have console showing
+        $.fn.log = function (msg, data) {
+            if (window.console && window.console.log) {
+                if (data === undefined)
+                    window.console.log(msg);
+                else
+                    window.console.log(msg + '  ' + JSON.stringify(data));
+            }
+            return this;
         }
             
     </script>

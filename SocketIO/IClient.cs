@@ -16,12 +16,17 @@ namespace SocketIOClient
 		WebSocket4Net.WebSocketState ReadyState { get; }
 
 		void Connect();
+		IEndPointClient Connect(string endPoint);
+
 		void Close();
 		void Dispose();
 
 		void On(string eventName, Action<SocketIOClient.Messages.IMessage> action);
-		void Emit(string eventName, dynamic payload, Action<dynamic> callBack = null);
+		void On(string eventName, string endPoint, Action<SocketIOClient.Messages.IMessage> action);
 
+		void Emit(string eventName, dynamic payload);
+		void Emit(string eventName, dynamic payload, string endPoint = "", Action<dynamic> callBack = null);
+		
 		void Send(SocketIOClient.Messages.IMessage msg);
 		//void Send(string rawEncodedMessageText);
 	}

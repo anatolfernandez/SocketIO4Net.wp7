@@ -4,6 +4,78 @@
 		<title></title>
 	</head>
 	<body>
-	
+    <div id="container">
+        <div class="header">
+            <h3>
+                Client Socket.IO Namespace Sample</h3>
+            <div>
+                <div class="content">
+                    <textarea id="textArea1" cols="80" rows="25" title="Debug Messages"></textarea>
+                </div>
+                <div class="footer">
+                    <button type="button" onclick='clearTextArea();'>
+                        Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src='/socket.io/socket.io.js' type='text/javascript'></script>
+    <script src='http://code.jquery.com/jquery-1.7.1.min.js' type="text/javascript"></script>
+	<script>
+	    $(document).ready(function () {
+	        // connect to two namespaces on server: chat, news
+	        //var chat = io.connect('/chat');
+	        var news = io.connect('/news');
+
+	        // *****************************************
+	        // *************  chat namespace ***********
+	        // *****************************************
+	        /*
+	        chat.on('connect', function () {
+	        showMessage('client connected to namespace [chat]');
+	        // showMessage('emit to server [chat] "hi!"');
+	        // chat.emit('hi!');
+	        });
+	        chat.on('a message', function (msg) {
+	        showMessage('recv [chat].[a message] = ', msg);
+	        });
+	        chat.on('message', function (msg) {
+	        showMessage('recv [chat].[message] = ', msg);
+	        });
+	        */
+	        news.on('disconnect', function (socket) {
+	            showMessage('client disconnected from namespace [news]');
+	        });
+	        // *****************************************
+	        // *************  news namespace ***********
+	        // *****************************************
+	        news.on('connect', function () {
+	            showMessage('client connected to namespace [news]');
+	            news.emit('killme');
+	        });
+	        news.on('item', function (msg) {
+	            showMessage('recv [news].[item] = ', msg);
+	        });
+	    });
+
+	    function showMessage(label, data) {
+	        if (data === undefined)
+	            $('#textArea1').append(label + '\r\n');
+	        else
+	            $('#textArea1').append(label + JSON.stringify(data) + '\r\n');
+	       $().log(label, data);
+	    }
+        // log helper - in particular when IE does not have console showing
+	    $.fn.log = function (msg, data) {
+	        if (window.console && window.console.log) {
+            if (data === undefined)
+                window.console.log(msg );
+            else
+	            window.console.log(msg + '  ' + JSON.stringify(data));
+	        }
+	        return this;
+	    }
+
+</script>
 	</body>
 </html>

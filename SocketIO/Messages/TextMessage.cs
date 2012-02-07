@@ -14,13 +14,16 @@ namespace SocketIOClient.Messages
 		public override string Event
 		{
 			get	{ return eventName;	}
-			set { this.eventName = value; }
 		}
 
         public TextMessage()
         {
             this.MessageType = SocketIOMessageTypes.Message;
         }
+		public TextMessage(string textMessage) : this()
+		{
+			this.MessageText = textMessage;
+		}
 
         public static TextMessage Deserialize(string rawMessage)
         {

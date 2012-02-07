@@ -26,6 +26,7 @@ Global
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.DebugILMerge|Mixed Platforms.ActiveCfg = DebugILMerge|Any CPU
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.DebugILMerge|Mixed Platforms.Build.0 = DebugILMerge|Any CPU
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}.ReleaseILMerge|Any CPU.ActiveCfg = ReleaseILMerge|Any CPU

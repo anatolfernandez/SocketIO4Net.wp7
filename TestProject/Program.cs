@@ -12,12 +12,15 @@ namespace TestProject
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("To Exit  Console: 'q'");
 			Console.WriteLine("To Clear Console: 'c'");
-			Console.WriteLine("To Send  event2:  '2'");
+			Console.WriteLine("--> Examples");
+			Console.WriteLine(" Callback sample: 'b'");
+			Console.WriteLine(" Namespace sample: 'n'");
 			Console.WriteLine("=============================");
 			Console.WriteLine("");
 			Console.ResetColor();
 
 			TestSocketIOClient tClient = new TestSocketIOClient();
+			
 			tClient.Execute();
 
 			bool run = true;
@@ -27,11 +30,21 @@ namespace TestProject
 				if (!string.IsNullOrWhiteSpace(line))
 				{
 					char key = line.FirstOrDefault();
+					
 					switch (key)
 					{
 						case 'c':
 						case 'C':
 							Console.Clear();
+							break;
+						case 'b':
+						case 'B':
+							tClient.CallbackExample();
+							break;
+
+						case 'n':
+						case 'N':
+							tClient.NamespaceExample();
 							break;
 
 						case 'q':
@@ -39,9 +52,7 @@ namespace TestProject
 							run = false;
 							break;
 						
-						case '2':
-							tClient.SendEvent2();
-							break;
+						
 						default:
 							break;
 					}

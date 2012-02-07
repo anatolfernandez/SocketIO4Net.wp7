@@ -34,14 +34,16 @@ namespace SocketIOClient.Messages
             this.MessageType = SocketIOMessageTypes.Event;
         }
 
-        public EventMessage(string eventName, object jsonObject, bool ackRequired = false, string endpoint = null, Action<dynamic> callBack = null):this()
+		public EventMessage(string eventName, object jsonObject, string endpoint = "", Action<dynamic> callBack = null)
+			: this()
         {
-			if (ackRequired || callBack != null)
-				this.AckId = EventMessage.NextAckID;
 			this.Callback = callBack;
-            this.Endpoint = endpoint;
-			
-            this.JsonEncodedMessage = new JsonEncodedEventMessage(eventName, jsonObject);
+			this.Endpoint = endpoint;
+
+			if (callBack != null)
+				this.AckId = EventMessage.NextAckID;
+
+			this.JsonEncodedMessage = new JsonEncodedEventMessage(eventName, jsonObject);
 			this.MessageText = this.JsonEncodedMessage.ToJsonString();
         }
 

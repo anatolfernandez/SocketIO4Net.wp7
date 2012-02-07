@@ -61,6 +61,12 @@ namespace SocketIOClient.Messages
 			}
 			set { this._json = value; }
 		}
+		
+		public JsonEncodedEventMessage Json
+		{
+			get { return this.JsonEncodedMessage; }
+		}
+		
 		/// <summary>
 		/// String value of the Event
 		/// </summary>
@@ -116,6 +122,8 @@ namespace SocketIOClient.Messages
 				char id = rawMessage.First();
 				switch (id)
 				{
+					case '0':
+						return DisconnectMessage.Deserialize(rawMessage);
 					case '1':
 						return ConnectMessage.Deserialize(rawMessage);
 					case '2':
