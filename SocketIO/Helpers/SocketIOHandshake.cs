@@ -46,7 +46,7 @@ namespace SocketIOClient
 
                     if (int.TryParse(items[1], out hb))
                     { 
-                        var pct = (int)(hb * .80);  // setup client time to occure 20% faster than needed
+                        var pct = (int)(hb * .75);  // setup client time to occure 25% faster than needed
                         returnItem.HeartbeatTimeout = pct;
                     }
                     if (int.TryParse(items[2], out ct))

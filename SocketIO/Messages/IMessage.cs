@@ -6,8 +6,14 @@ using System.Text;
 
 namespace SocketIOClient.Messages
 {
+	/// <summary>
+	/// Interface for core Message class
+	/// </summary>
     public interface IMessage
     {
+		/// <summary>
+		/// Enumeration of one of 9 basic messages provided by socket.io
+		/// </summary>
 		SocketIOMessageTypes MessageType { get; }
 
 		/// <summary>
@@ -16,7 +22,13 @@ namespace SocketIOClient.Messages
 		/// </summary>
 		string RawMessage { get; }
 
+		/// <summary>
+		/// Event 'name' of originating message
+		/// </summary>
 		string Event { get; }
+		/// <summary>
+		/// AckId represents unique id associated with a message callback
+		/// </summary>
 		int? AckId { get; }
 
 		/// <summary>

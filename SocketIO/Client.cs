@@ -23,7 +23,7 @@ namespace SocketIOClient
 		private Task dequeuOutBoundMsgTask;
 		private BlockingCollection<string> outboundQueue;
 		private int retryConnectionCount = 0;
-		private readonly static object padLock = new object();
+		private readonly static object padLock = new object(); // alow one connection attempt at a time
 
 		protected Uri uri;
 		protected WebSocket wsClient;
@@ -92,11 +92,6 @@ namespace SocketIOClient
 		public Client(string url, WebSocketVersion socketVersion)
 		{
 			this.uri = new Uri(url);
-			if (this.uri.Scheme == Uri.UriSchemeHttps)
-			{
-				this.LastErrorMessage = "They underlying WebSocket4Net library cannot support wss (yet).";
-				throw new ArgumentException(this.LastErrorMessage);
-			}
 
 			this.socketVersion = socketVersion;
 
@@ -126,11 +121,9 @@ namespace SocketIOClient
 						else
 						{
 							string wsScheme = (uri.Scheme == Uri.UriSchemeHttps ? "wss" : "ws");
-
 							this.wsClient = new WebSocket(
 								string.Format("{0}://{1}:{2}/socket.io/1/websocket/{3}", wsScheme, uri.Host, uri.Port, this.HandShake.SID),
 								string.Empty,
-								new List<KeyValuePair<string, string>>(),
 								this.socketVersion);
 
 							this.wsClient.Opened += this.wsClient_OpenEvent;
@@ -229,7 +222,6 @@ namespace SocketIOClient
 				case "retry":
 				case "reconnect":
 					throw new System.ArgumentOutOfRangeException(eventName, "Event name is reserved by socket.io, and cannot be used by clients or servers with this message type");
-					break;
 				default:
 					if (!string.IsNullOrWhiteSpace(endPoint) && !endPoint.StartsWith("/"))
 						endPoint = "/" + endPoint;
@@ -358,6 +350,11 @@ namespace SocketIOClient
 
 		}
 
+		/// <summary>
+		/// Raw websocket messages from server - convert to message types and call subscribers of events and/or callbacks
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void wsClient_MessageReceived(object sender, MessageReceivedEventArgs e)
 		{
 			Trace.WriteLine(string.Format("webSocket_OnMessage: {0}", e.Message));
@@ -381,7 +378,7 @@ namespace SocketIOClient
 					this.OnMessageEvent(iMsg);
 					break;
 				case SocketIOMessageTypes.ACK:
-					this.registrationManager.InvokeCallBack(iMsg.AckId, iMsg.JsonEncodedMessage);
+					this.registrationManager.InvokeCallBack(iMsg.AckId, iMsg.Json);
 					break;
 				default:
 					Trace.WriteLine("unknown wsClient message Received...");
@@ -440,7 +437,7 @@ namespace SocketIOClient
 		}
 
 		/// <summary>
-		/// 
+		/// While connection is open, dequeue and send messages to the socket server
 		/// </summary>
 		protected void dequeuOutboundMessages()
 		{
@@ -486,7 +483,7 @@ namespace SocketIOClient
 			{
 				try
 				{
-					value = client.DownloadString(string.Format("http://{0}:{1}/socket.io/1/", uri.Host, uri.Port));
+					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/",uri.Scheme, uri.Host, uri.Port));
 					// 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
 					if (string.IsNullOrEmpty(value))
 						errorText = "Did not receive handshake string from server";

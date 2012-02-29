@@ -79,3 +79,17 @@
 </script>
 	</body>
 </html>
+
+
+<script>
+    var chat = io.connect('http://localhost:3000/chat')
+    , logger = io.connect('http://localhost:3000/logger);
+
+    chat.on('connect', function () {
+        chat.emit('hi!');
+    });
+
+    logger.on('traceEvent', function () {
+        news.emit('woot');
+    });
+</script>

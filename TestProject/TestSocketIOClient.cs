@@ -25,7 +25,7 @@ namespace TestProject
 			socket.Message += SocketMessage;
 			socket.SocketConnectionClosed += SocketConnectionClosed;
 			socket.Error += SocketError;
-			
+
 			// register for 'connect' event with io server
 			socket.On("connect", (fn) =>
 			{
@@ -45,7 +45,7 @@ namespace TestProject
 				//Console.WriteLine("  string message:   {0}", data.MessageText);
 				//Console.WriteLine("  json data string: {0}", data.Json.ToJsonString());
 				//Console.WriteLine("  json raw:         {0}", data.Json.Args[0]);
-				
+
 				// cast message as Part - use type cast helper
 				Part part = data.Json.GetFirstArgAs<Part>();
 				Console.WriteLine(" Part Level:   {0}\r\n", part.Level);
@@ -64,7 +64,55 @@ namespace TestProject
 					Console.WriteLine(string.Format("callback [root].[messageAck]: {0} \r\n", jsonMsg.Args));
 				});
 		}
+		
+		private ManualResetEvent testHold = new ManualResetEvent(false);
+void direct_Example()
+{
 
+	var directSocket = new Client("http://127.0.0.1:3000/logger"); // url to the nodejs
+	directSocket.Connect();
+	directSocket.On("connect", (fn) =>
+	{
+		Console.WriteLine("\r\nConnected event...\r\n");
+	});
+
+
+	directSocket.On("traceEvent", (eventLog) =>
+		{
+			// do something with eventLog
+		});
+
+	directSocket.Emit("messageAck", new { hello = "papa" });
+}
+void similar_Example()
+{
+	var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
+	socket.Connect();
+	socket.On("connect", (fn) =>
+	{
+		Console.WriteLine("\r\nConnected event...\r\n");
+	});
+
+	var logger = socket.Connect("/logger"); // connect to the logger ns
+	logger.On("traceEvent", (eventLog) =>
+	{
+		// do something with eventLog
+	});
+}
+void explicit_Example()
+{
+	var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
+	socket.Connect();
+	socket.Connect("/logger");
+
+	// EventMessage by namespace
+	socket.On("traceEvent", "/logger", (eventLog) =>
+	{
+		Console.WriteLine("recv #1 [logger].[traceEvent] : {0}\r\n", eventLog.Json.GetFirstArgAs<EventLog>().ToJsonString());
+	});
+	socket.Emit("messageAck", new { hello = "papa" }, "/logger");
+}
+		//			testHold.WaitOne(5000);
 		IEndPointClient logger;
 		public void NamespaceExample()
 		{
@@ -75,7 +123,7 @@ namespace TestProject
 			// traditional socket.io syntax style
 			if (logger == null)
 				logger = socket.Connect("/logger"); // connect to the logger ns on server, must use '/' dir prefix
-			
+
 			logger.On("traceEvent", (eventLog) =>
 			{
 				Console.WriteLine("recv #2 [logger].[traceEvent] : {0}", eventLog.Json.GetFirstArgAs<EventLog>().ToJsonString());
@@ -85,7 +133,7 @@ namespace TestProject
 			//{
 			//    Console.WriteLine("recv #1 [logger].[traceEvent] : {0}\r\n", eventLog.Json.GetFirstArgAs<EventLog>().ToJsonString());
 			//});
-			
+
 			Console.WriteLine("Emit [logger].[messageAck] - should recv callback [logger].[messageAck]");
 			logger.Emit("messageAck", new { hello = "papa" }, (callback) =>
 			{
@@ -93,7 +141,7 @@ namespace TestProject
 				Console.WriteLine(string.Format("recv [logger].[messageAck]: {0} \r\n", jsonMsg.ToJsonString()));
 			});
 		}
-		
+
 		void MiscExamples()
 		{
 			// random examples of different styles of sending / recv payloads - will add to...
@@ -118,7 +166,7 @@ namespace TestProject
 					Console.WriteLine(string.Format("callback [socket::logger].[messageAck]: {0} \r\n", jsonMsg.ToJsonString()));
 				});
 		}
-		
+
 		void SocketError(object sender, ErrorEventArgs e)
 		{
 			Console.WriteLine("socket client error:");
@@ -141,14 +189,14 @@ namespace TestProject
 
 		void SocketOpened(object sender, EventArgs e)
 		{
-			
+
 		}
 
 		public void Close()
 		{
 			if (this.socket != null)
 			{
-				socket.Opened -=SocketOpened;
+				socket.Opened -= SocketOpened;
 				socket.Message -= SocketMessage;
 				socket.SocketConnectionClosed -= SocketConnectionClosed;
 				socket.Error -= SocketError;
@@ -156,5 +204,5 @@ namespace TestProject
 			}
 		}
 	}
-	
+
 }

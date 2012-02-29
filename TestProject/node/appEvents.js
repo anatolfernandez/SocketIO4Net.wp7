@@ -10,7 +10,7 @@ var argv = require('optimist')
 
 var express = require('express')
   , server = express.createServer()
-  , socketio = require('socket.io')
+  , socketio = require('socket.io');
 
   // configure Express
 server.configure(function () {
@@ -24,7 +24,7 @@ server.listen(argv.port, argv.host); // http listen on host:port e.g. http://loc
 
 // configure Socket.IO
 var io = socketio.listen(server); // start socket.io
-io.set('log level', 1);
+io.set('log level', 4);
 
 
 console.log('');
