@@ -64,54 +64,54 @@ namespace TestProject
 					Console.WriteLine(string.Format("callback [root].[messageAck]: {0} \r\n", jsonMsg.Args));
 				});
 		}
-		
+
 		private ManualResetEvent testHold = new ManualResetEvent(false);
-void direct_Example()
-{
-
-	var directSocket = new Client("http://127.0.0.1:3000/logger"); // url to the nodejs
-	directSocket.Connect();
-	directSocket.On("connect", (fn) =>
-	{
-		Console.WriteLine("\r\nConnected event...\r\n");
-	});
-
-
-	directSocket.On("traceEvent", (eventLog) =>
+		void direct_Example()
 		{
-			// do something with eventLog
-		});
 
-	directSocket.Emit("messageAck", new { hello = "papa" });
-}
-void similar_Example()
-{
-	var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
-	socket.Connect();
-	socket.On("connect", (fn) =>
-	{
-		Console.WriteLine("\r\nConnected event...\r\n");
-	});
+			var directSocket = new Client("http://127.0.0.1:3000/logger"); // url to the nodejs
+			directSocket.Connect();
+			directSocket.On("connect", (fn) =>
+			{
+				Console.WriteLine("\r\nConnected event...\r\n");
+			});
 
-	var logger = socket.Connect("/logger"); // connect to the logger ns
-	logger.On("traceEvent", (eventLog) =>
-	{
-		// do something with eventLog
-	});
-}
-void explicit_Example()
-{
-	var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
-	socket.Connect();
-	socket.Connect("/logger");
 
-	// EventMessage by namespace
-	socket.On("traceEvent", "/logger", (eventLog) =>
-	{
-		Console.WriteLine("recv #1 [logger].[traceEvent] : {0}\r\n", eventLog.Json.GetFirstArgAs<EventLog>().ToJsonString());
-	});
-	socket.Emit("messageAck", new { hello = "papa" }, "/logger");
-}
+			directSocket.On("traceEvent", (eventLog) =>
+				{
+					// do something with eventLog
+				});
+
+			directSocket.Emit("messageAck", new { hello = "papa" });
+		}
+		void similar_Example()
+		{
+			var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
+			socket.Connect();
+			socket.On("connect", (fn) =>
+			{
+				Console.WriteLine("\r\nConnected event...\r\n");
+			});
+
+			var logger = socket.Connect("/logger"); // connect to the logger ns
+			logger.On("traceEvent", (eventLog) =>
+			{
+				// do something with eventLog
+			});
+		}
+		void explicit_Example()
+		{
+			var socket = new Client("http://127.0.0.1:3000/"); // url to the nodejs
+			socket.Connect();
+			socket.Connect("/logger");
+
+			// EventMessage by namespace
+			socket.On("traceEvent", "/logger", (eventLog) =>
+			{
+				Console.WriteLine("recv #1 [logger].[traceEvent] : {0}\r\n", eventLog.Json.GetFirstArgAs<EventLog>().ToJsonString());
+			});
+			socket.Emit("messageAck", new { hello = "papa" }, "/logger");
+		}
 		//			testHold.WaitOne(5000);
 		IEndPointClient logger;
 		public void NamespaceExample()

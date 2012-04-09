@@ -30,6 +30,7 @@ io.set('log level', 4);
 console.log('');
 console.log('Nodejs Version: ',process.version);
 console.log('     Listening: http://',argv.host, ':', argv.port);
+console.log('    Socket.IO : v',socketio.version);
 console.log('');
 
 // ***************************************************************

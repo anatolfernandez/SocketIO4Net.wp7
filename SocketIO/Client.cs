@@ -48,6 +48,16 @@ namespace SocketIOClient
 		public ManualResetEvent MessageQueueEmptyEvent = new ManualResetEvent(true);
 		public ManualResetEvent ConnectionOpenEvent = new ManualResetEvent(false);
 
+		private int retryConnectionAttempts = 3;
+		/// <summary>
+		/// Number of reconnection attempts before raising SocketConnectionClosed event - (default = 3)
+		/// </summary>
+		public int RetryConnectionAttempts
+		{
+			get { return this.retryConnectionCount; }
+			set { this.retryConnectionCount = value; }
+		}
+
 		/// <summary>
 		/// Value of the last error message text  
 		/// </summary>
@@ -153,8 +163,13 @@ namespace SocketIOClient
 
 		protected void ReConnect()
 		{
-			Trace.WriteLine("Attempting to reconnect");
 			this.retryConnectionCount++;
+			if (this.ConnectionRetryAttempt != null)
+			{
+				try { this.ConnectionRetryAttempt(this, EventArgs.Empty); }
+				catch (Exception ex) { Trace.WriteLine(ex); }
+			}
+			Trace.WriteLine(string.Format("Attempting to reconnect: {0}", this.retryConnectionCount));
 
 			this.closeHeartBeatTimer(); // stop the heartbeat time
 			this.closeWebSocketClient();// stop websocket
@@ -162,7 +177,7 @@ namespace SocketIOClient
 			this.Connect();
 
 			bool connected = this.ConnectionOpenEvent.WaitOne(4000);
-			Trace.WriteLine(string.Format("Connection successfull: {0}", connected));
+			Trace.WriteLine(string.Format("Retry-Connection successful: {0}", connected));
 		}
 
 		/// <summary>
@@ -282,6 +297,7 @@ namespace SocketIOClient
 
 		public void Close()
 		{
+			this.retryConnectionCount = 0; // reset for next connection cycle
 			// stop the heartbeat time
 			this.closeHeartBeatTimer();
 
@@ -393,7 +409,7 @@ namespace SocketIOClient
 		/// <param name="e"></param>
 		private void wsClient_Closed(object sender, EventArgs e)
 		{
-			if (retryConnectionCount < 3)
+			if (retryConnectionCount < this.RetryConnectionAttempts)
 			{
 				retryConnectionCount++;
 				this.ConnectionOpenEvent.Reset();

@@ -41,6 +41,7 @@ namespace SocketIOClient.Messages
         public virtual string MessageText { get; set; }
 
 		private JsonEncodedEventMessage _json;
+		[ObsoleteAttribute(".JsonEncodedMessage has been deprecated. Please use .Json instead.")]
 		public JsonEncodedEventMessage JsonEncodedMessage
 		{
 			get

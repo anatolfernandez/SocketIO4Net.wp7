@@ -36,7 +36,7 @@ namespace SocketIOClient.Messages
             {
                 var firstArg = this.Args.FirstOrDefault();
                 if (firstArg != null)
-                    return JsonConvert.DeserializeObject<T>(firstArg.ToString(Formatting.None));
+                    return JsonConvert.DeserializeObject<T>(firstArg.ToString());
             }
             catch (Exception ex)
             {
