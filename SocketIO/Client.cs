@@ -37,6 +37,7 @@ namespace SocketIOClient
 		public event EventHandler Opened;
 		public event EventHandler<MessageEventArgs> Message;
 		public event EventHandler ConnectionRetryAttempt;
+		public event EventHandler HeartBeatTimerEvent;
 		/// <summary>
 		/// <para>The underlying websocket connection has closed (unexpectedly)</para>
 		/// <para>The Socket.IO service may have closed the connection due to a heartbeat timeout, or the connection was just broken</para>
@@ -384,7 +385,7 @@ namespace SocketIOClient
 						this.Close();
 					break;
 				case SocketIOMessageTypes.Heartbeat:
-					this.outboundQueue.Add(new Heartbeat().Encoded);
+					this.OnHeartBeatTimerCallback(null);
 					break;
 				case SocketIOMessageTypes.Connect:
 				case SocketIOMessageTypes.Message:
@@ -448,16 +449,45 @@ namespace SocketIOClient
 			if (this.ReadyState == WebSocketState.Open)
 			{
 				IMessage msg = new Heartbeat();
-				this.outboundQueue.Add(msg.Encoded);
+				try
+				{
+					if (this.outboundQueue != null && !this.outboundQueue.IsAddingCompleted)
+					{
+						this.outboundQueue.Add(msg.Encoded);
+						if (this.HeartBeatTimerEvent != null)
+						{
+							this.HeartBeatTimerEvent.BeginInvoke(this, EventArgs.Empty, EndAsyncEvent, null);
+						}
+					}
+				}
+				catch(Exception ex)
+				{
+					// 
+					Trace.WriteLine(string.Format("OnHeartBeatTimerCallback Error Event: {0}\r\n\t{1}", ex.Message, ex.InnerException));
+				}
 			}
 		}
+		private void EndAsyncEvent(IAsyncResult result)
+		{
+			var ar = (System.Runtime.Remoting.Messaging.AsyncResult)result;
+			var invokedMethod = (EventHandler)ar.AsyncDelegate;
 
+			try
+			{
+				invokedMethod.EndInvoke(result);
+			}
+			catch
+			{
+				// Handle any exceptions that were thrown by the invoked method
+				Trace.WriteLine("An event listener went kaboom!");
+			}
+		}
 		/// <summary>
 		/// While connection is open, dequeue and send messages to the socket server
 		/// </summary>
 		protected void dequeuOutboundMessages()
 		{
-			while (!this.outboundQueue.IsAddingCompleted)
+			while (this.outboundQueue != null && !this.outboundQueue.IsAddingCompleted)
 			{
 				if (this.ReadyState == WebSocketState.Open)
 				{
@@ -496,7 +526,7 @@ namespace SocketIOClient
 			SocketIOHandshake handshake = null;
 
 			using (WebClient client = new WebClient())
-			{
+			{ 
 				try
 				{
 					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/",uri.Scheme, uri.Host, uri.Port));
