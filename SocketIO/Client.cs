@@ -16,8 +16,8 @@ namespace SocketIOClient
 	/// <summary>
 	/// Class to emulate socket.io javascript client capabilities for .net classes
 	/// </summary>
-	/// <exception cref = "ArgumentException" for wss or https urls />
-	public class Client : IDisposable, SocketIOClient.IClient
+	/// <exception cref = "ArgumentException">Connection for wss or https urls</exception>  
+	public  class Client : IDisposable, SocketIOClient.IClient
 	{
 		private Timer socketHeartBeatTimer; // HeartBeat timer 
 		private Task dequeuOutBoundMsgTask;
@@ -25,9 +25,21 @@ namespace SocketIOClient
 		private int retryConnectionCount = 0;
 		private readonly static object padLock = new object(); // alow one connection attempt at a time
 
+		/// <summary>
+		/// Uri of Websocket server
+		/// </summary>
 		protected Uri uri;
+		/// <summary>
+		/// Underlying WebSocket implementation
+		/// </summary>
 		protected WebSocket wsClient;
+		/// <summary>
+		/// RegistrationManager for dynamic events
+		/// </summary>
 		protected RegistrationManager registrationManager;  // allow registration of dynamic events (event names) for client actions
+		/// <summary>
+		/// By Default, use WebSocketVersion.Rfc6455
+		/// </summary>
 		protected WebSocketVersion socketVersion = WebSocketVersion.Rfc6455;
 
 		// Events
@@ -46,10 +58,16 @@ namespace SocketIOClient
 		public event EventHandler SocketConnectionClosed;
 		public event EventHandler<ErrorEventArgs> Error;
 
+		/// <summary>
+		/// ResetEvent for Outbound MessageQueue Empty Event - all pending messages have been sent
+		/// </summary>
 		public ManualResetEvent MessageQueueEmptyEvent = new ManualResetEvent(true);
+
+		/// <summary>
+		/// Connection Open Event
+		/// </summary>
 		public ManualResetEvent ConnectionOpenEvent = new ManualResetEvent(false);
 
-		private int retryConnectionAttempts = 3;
 		/// <summary>
 		/// Number of reconnection attempts before raising SocketConnectionClosed event - (default = 3)
 		/// </summary>
@@ -563,9 +581,21 @@ namespace SocketIOClient
 
 		public void Dispose()
 		{
-			this.Close();
-			this.MessageQueueEmptyEvent.Dispose();
-			this.ConnectionOpenEvent.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		// The bulk of the clean-up code 
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				// free managed resources
+				this.Close();
+				this.MessageQueueEmptyEvent.Dispose();
+				this.ConnectionOpenEvent.Dispose();
+			}
+			
 		}
 	}
 

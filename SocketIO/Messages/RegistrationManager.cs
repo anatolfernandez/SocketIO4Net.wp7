@@ -93,8 +93,16 @@ namespace SocketIOClient.Eventing
 			}
 			return foundEvent;
 		}
+
+		// Dispose() calls Dispose(true)
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 		
-		public void  Dispose()
+		// The bulk of the clean-up code is implemented in Dispose(bool)
+		protected virtual void Dispose(bool disposing)
 		{
 			this.callBackRegistry.Clear();
 			this.eventNameRegistry.Clear();
