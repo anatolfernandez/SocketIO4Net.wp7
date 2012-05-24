@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -89,8 +90,7 @@ namespace SocketIOClient.Messages
                     return string.Format("{0}::{1}:{2}", msgId, this.Endpoint, this.MessageText);
             }
         }
-
-        
+       
 
         public Message()
         {
@@ -142,11 +142,15 @@ namespace SocketIOClient.Messages
 					case '8':
 						return new NoopMessage();
 					default:
+						Trace.WriteLine(string.Format("Message.Factory undetermined message: {0}", rawMessage));
 						return new TextMessage();
 				}
 			}
 			else
+			{
+				Trace.WriteLine(string.Format("Message.Factory did not find matching message type: {0}", rawMessage));
 				return new NoopMessage();
+			}
 		}
     }
 }

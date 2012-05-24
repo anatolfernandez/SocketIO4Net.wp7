@@ -37,6 +37,7 @@ namespace TestProject
 				socket.Emit("partInfo", newPart);
 			});
 
+			
 			// register for 'update' events - message is a json 'Part' object
 			socket.On("update", (data) =>
 			{

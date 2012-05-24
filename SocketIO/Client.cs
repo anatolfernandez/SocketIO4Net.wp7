@@ -16,7 +16,7 @@ namespace SocketIOClient
 	/// <summary>
 	/// Class to emulate socket.io javascript client capabilities for .net classes
 	/// </summary>
-	/// <exception cref="ArgumentException" for wss or https urls />
+	/// <exception cref = "ArgumentException" for wss or https urls />
 	public class Client : IDisposable, SocketIOClient.IClient
 	{
 		private Timer socketHeartBeatTimer; // HeartBeat timer 
@@ -180,7 +180,7 @@ namespace SocketIOClient
 			bool connected = this.ConnectionOpenEvent.WaitOne(4000);
 			Trace.WriteLine(string.Format("Retry-Connection successful: {0}", connected));
 		}
-
+		
 		/// <summary>
 		/// <para>Asynchronously calls the action delegate on event message notification</para>
 		/// <para>Mimicks the Socket.IO client 'socket.on('name',function(data){});' pattern</para>
@@ -205,6 +205,7 @@ namespace SocketIOClient
 			string endPoint,
 			Action<IMessage> action)
 		{
+			
 			this.registrationManager.AddOnEvent(eventName, endPoint, action);
 		}
 		/// <summary>
@@ -287,13 +288,18 @@ namespace SocketIOClient
 		/// <param name="msg"></param>
 		protected void OnMessageEvent(IMessage msg)
 		{
+			
+
 			bool skip = false;
 			if (!string.IsNullOrEmpty(msg.Event))
 				skip = this.registrationManager.InvokeOnEvent(msg); // 
 
 			var handler = this.Message;
 			if (handler != null && !skip)
+			{
+				Trace.WriteLine(string.Format("webSocket_OnMessage: {0}", msg.RawMessage));
 				handler(this, new MessageEventArgs(msg));
+			}
 		}
 
 		public void Close()
@@ -374,9 +380,13 @@ namespace SocketIOClient
 		/// <param name="e"></param>
 		private void wsClient_MessageReceived(object sender, MessageReceivedEventArgs e)
 		{
-			Trace.WriteLine(string.Format("webSocket_OnMessage: {0}", e.Message));
+			
 
 			IMessage iMsg = SocketIOClient.Messages.Message.Factory(e.Message);
+
+			if (iMsg.Event == "responseMsg")
+				Trace.WriteLine(string.Format("InvokeOnEvent: {0}", iMsg.RawMessage));
+
 			switch (iMsg.MessageType)
 			{
 				case SocketIOMessageTypes.Disconnect:
@@ -496,7 +506,7 @@ namespace SocketIOClient
 					{
 						try
 						{
-							Trace.WriteLine(string.Format("webSocket_Send: {0}", msgString));
+							//Trace.WriteLine(string.Format("webSocket_Send: {0}", msgString));
 							this.wsClient.Send(msgString);
 						}
 						catch { }

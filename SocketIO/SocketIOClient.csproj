@@ -71,18 +71,6 @@
     <DocumentationFile>..\bin\ReleaseILMerge\SocketIOClient.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleJson">
-      <HintPath>..\Reference\websocket4net\net40\SimpleJson.dll</HintPath>
-    </Reference>
-    <Reference Include="SuperSocket.ClientEngine.Common">
-      <HintPath>..\Reference\websocket4net\net40\SuperSocket.ClientEngine.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="SuperSocket.ClientEngine.Core">
-      <HintPath>..\Reference\websocket4net\net40\SuperSocket.ClientEngine.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SuperSocket.ClientEngine.Protocol">
-      <HintPath>..\Reference\websocket4net\net40\SuperSocket.ClientEngine.Protocol.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -122,6 +110,7 @@
     <Reference Include="Newtonsoft.Json, Version=4.0.8.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WebSocket4Net, Version=0.4.0.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

@@ -48,6 +48,8 @@ server.get('/', function (req, res) {
 // ***************************************************************
 io.sockets.on('connection', function (socket) {
 
+    socket.emit('Value', { Data: 'a string' });
+
     socket.on('partInfo', function (data) {
         console.log('recv [socket].[partInfo]  data = {0} \r\n'.format(JSON.stringify(data)));
         data.Level = 3;
