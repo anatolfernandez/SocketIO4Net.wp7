@@ -35,6 +35,7 @@ namespace TestProject
 				// emit Json Serializable object, anonymous types, or strings
 				Part newPart = new Part() { PartNumber = "K4P2G324EC", Code = "DDR2", Level = 1 };
 				socket.Emit("partInfo", newPart);
+
 			});
 
 			
@@ -50,6 +51,7 @@ namespace TestProject
 				// cast message as Part - use type cast helper
 				Part part = data.Json.GetFirstArgAs<Part>();
 				Console.WriteLine(" Part Level:   {0}\r\n", part.Level);
+
 			});
 
 			// make the socket.io connection
@@ -167,7 +169,7 @@ namespace TestProject
 					Console.WriteLine(string.Format("callback [socket::logger].[messageAck]: {0} \r\n", jsonMsg.ToJsonString()));
 				});
 		}
-
+		
 		void SocketError(object sender, ErrorEventArgs e)
 		{
 			Console.WriteLine("socket client error:");
