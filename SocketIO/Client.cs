@@ -332,7 +332,10 @@ namespace SocketIOClient
 				handler(this, new MessageEventArgs(msg));
 			}
 		}
-
+		
+		/// <summary>
+		/// Close SocketIO4Net.Client and clear all event registrations 
+		/// </summary>
 		public void Close()
 		{
 			this.retryConnectionCount = 0; // reset for next connection cycle
