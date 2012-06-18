@@ -157,7 +157,7 @@ namespace SocketIOClient
 								string.Format("{0}://{1}:{2}/socket.io/1/websocket/{3}", wsScheme, uri.Host, uri.Port, this.HandShake.SID),
 								string.Empty,
 								this.socketVersion);
-
+							this.wsClient.EnableAutoSendPing = false; // #4 tkiley: Websocket4net client library initiates a websocket heartbeat, causes delivery problems
 							this.wsClient.Opened += this.wsClient_OpenEvent;
 							this.wsClient.MessageReceived += this.wsClient_MessageReceived;
 							this.wsClient.Error += this.wsClient_Error;
@@ -586,7 +586,7 @@ namespace SocketIOClient
 			{ 
 				try
 				{
-					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/",uri.Scheme, uri.Host, uri.Port));
+					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/{3}", uri.Scheme, uri.Host, uri.Port, uri.Query)); // #5 tkiley: The uri.Query is available in socket.io's handshakeData object during authorization
 					// 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
 					if (string.IsNullOrEmpty(value))
 						errorText = "Did not receive handshake string from server";
