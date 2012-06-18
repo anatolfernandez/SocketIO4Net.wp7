@@ -389,7 +389,7 @@ namespace SocketIOClient
 				if (this.wsClient.State == WebSocketState.Connecting || this.wsClient.State == WebSocketState.Open)
 				{
 					try { this.wsClient.Close(); }
-					catch { Trace.WriteLine("exception raised trying to close websocket: can safely ignore - "); }
+					catch { Trace.WriteLine("exception raised trying to close websocket: can safely ignore, socket is being closed"); }
 				}
 				this.wsClient = null;
 			}
