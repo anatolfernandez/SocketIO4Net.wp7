@@ -68,11 +68,11 @@ namespace SocketIOClient.Messages
 						evtMsg.MessageText.Contains("name") &&
 						evtMsg.MessageText.Contains("args"))
 					{
-						evtMsg.JsonEncodedMessage = JsonEncodedEventMessage.Deserialize(evtMsg.MessageText);
-						evtMsg.Event = evtMsg.JsonEncodedMessage.Name;
+						evtMsg.Json = JsonEncodedEventMessage.Deserialize(evtMsg.MessageText);
+						evtMsg.Event = evtMsg.Json.Name;
 					}
 					else
-						evtMsg.JsonEncodedMessage = new JsonEncodedEventMessage();
+						evtMsg.Json = new JsonEncodedEventMessage();
 				}
 			}
 			catch (Exception ex)
