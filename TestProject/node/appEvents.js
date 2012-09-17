@@ -1,6 +1,6 @@
 ﻿// SocketIO4Net - nodejs SocketIO Server
-// version: v0.5.20
-// node.exe v0.6.10
+// version: v0.7.5
+// node.exe v0.8.9
 
 // require command-line options to start this application
 var argv = require('optimist')
@@ -8,24 +8,32 @@ var argv = require('optimist')
     .demand(['host', 'port'])
     .argv;
 
-var express = require('express')
-  , server = express.createServer()
-  , socketio = require('socket.io');
+var http = require('http'),
+    express = require('express'),
+    app = express(),
+    socketio = require('socket.io');
 
   // configure Express
-server.configure(function () {
-    server.use(express.bodyParser());
-    server.use('/content', express.static(__dirname + '/content'));
-    server.use('/scripts', express.static(__dirname + '/scripts'));
+app.configure(function () {
+    app.use(express.bodyParser());
+    app.use('/content', express.static(__dirname + '/content'));
+    app.use('/scripts', express.static(__dirname + '/scripts'));
     });
 
 // start server listening at host:port
-server.listen(argv.port, argv.host); // http listen on host:port e.g. http://localhost:3000/
+var server = http.createServer(app).listen(argv.port, argv.host);
 
 // configure Socket.IO
 var io = socketio.listen(server); // start socket.io
-io.set('log level', 4);
 
+io.configure(function () {
+    io.set('log level', 4),
+    io.set('authorization', function (handshakeData, callback) {
+        // auth simulation routine
+        console.dir(handshakeData);
+        callback(null,true); // error first callback style
+    });
+});
 
 console.log('');
 console.log('Nodejs Version: ',process.version);
@@ -37,7 +45,7 @@ console.log('');
 //    WEB Handlers  
 //    Express guid: http://expressjs.com/guide.html
 // ***************************************************************
-server.get('/', function (req, res) {
+app.get('/', function (req, res) {
     res.sendfile(__dirname + '/appEventsClient.html');
 });
 
@@ -116,7 +124,7 @@ var logger = io
           }));  // all 'logger' clients will receive this event
       });
       
-  });
+  })
 
   // simple object to pass on events - matches our C# object
   function eventLog(obj) {
@@ -128,7 +136,7 @@ var logger = io
       for (var prop in obj) {
           this[prop] = obj[prop];
       }
-  };
+  }
 
   // simple Part object - matches our C# object
   function Part(obj) {
@@ -139,7 +147,7 @@ var logger = io
       for (var prop in obj) {
           this[prop] = obj[prop];
       }
-  };
+  }
 
   //************************************
   //        Helpers 
@@ -150,12 +158,9 @@ var logger = io
   // and will stringify objects/arrays.
   String.prototype.format = function () {
       var args = arguments;
-      return this.replace(/{(\d+)}/g, function (match, number) {
-          return typeof args[number] != 'undefined'
-      ? args[number]
-      : match
-    ;
+      return this.replace(/\{(\d+)\}/g, function (match, number) {
+          return typeof args[number] !== undefined ? args[number] : match;
       });
-  };
+  }
 
 

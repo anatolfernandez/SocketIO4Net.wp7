@@ -24,7 +24,7 @@ server.listen(argv.port, argv.host); // http listen on host:port e.g. http://loc
 
 // configure Socket.IO
 var io = socketio.listen(server); // start socket.io
-io.set('log level', 5);
+io.set('log level', 1);
 
 
 console.log('');
@@ -40,7 +40,14 @@ server.get('/', function (req, res) {
     res.sendfile(__dirname + '/appNamespace.html');
 });
 
+io.sockets.on('connection', function (socket) {
+     console.log('general socket connection');
 
+     socket.on('disconnect', function () {
+         io.sockets.emit('user disconnected');
+     });
+  });
+  
 // ***************************************************************
 //    Socket.IO Client Handlers - with namespace
 // ***************************************************************
@@ -76,12 +83,6 @@ var chat = io
   });
 
  
-  io.sockets.on('connection', function (socket) {
-     console.log('general socket connection');
-
-     socket.on('disconnect', function () {
-         io.sockets.emit('user disconnected');
-     });
-  });
+  
 
   
