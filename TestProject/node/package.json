@@ -1,0 +1,25 @@
+{
+  "name": "socketio4net-demo",
+  "version": "0.7.5",
+  "description": "Example code for socketio4net.client C# - Nodejs",
+  "main": "appEvents.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "socket.io": "~0.9.10",
+    "optimist": "~0.3.4",
+    "express": "~3.0.0rc4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "socket.io",
+    "C#",
+    "realtime"
+  ],
+  "author": "J. W. Stott",
+  "license": "BSD"
+}
