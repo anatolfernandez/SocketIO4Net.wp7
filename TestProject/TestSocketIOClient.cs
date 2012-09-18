@@ -25,6 +25,9 @@ namespace TestProject
 			socket.Message += SocketMessage;
 			socket.SocketConnectionClosed += SocketConnectionClosed;
 			socket.Error += SocketError;
+			
+			socket.HandShake.Headers.Add("OrganizationId", "1034");
+			socket.HandShake.Headers.Add("UserId", "TestSample");
 
 			// register for 'connect' event with io server
 			socket.On("connect", (fn) =>
@@ -116,6 +119,7 @@ namespace TestProject
 			socket.Emit("messageAck", new { hello = "papa" }, "/logger");
 		}
 		//			testHold.WaitOne(5000);
+
 		IEndPointClient logger;
 		public void NamespaceExample()
 		{
@@ -142,6 +146,14 @@ namespace TestProject
 			{
 				var jsonMsg = callback as JsonEncodedEventMessage; // callback will be of type JsonEncodedEventMessage, cast for intellisense
 				Console.WriteLine(string.Format("recv [logger].[messageAck]: {0} \r\n", jsonMsg.ToJsonString()));
+			});
+			logger.On("connect_failed", (reason) =>
+			{
+				Console.WriteLine(string.Format("unable to connect to namespace {0}",reason));
+			});
+			logger.On("connect", (fn) =>
+			{
+				Console.WriteLine("successfully established a connection with the namespace logger");
 			});
 		}
 

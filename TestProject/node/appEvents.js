@@ -27,7 +27,7 @@ var server = http.createServer(app).listen(argv.port, argv.host);
 var io = socketio.listen(server); // start socket.io
 
 io.configure(function () {
-    io.set('log level', 4),
+    io.set('log level', 2),
     io.set('authorization', function (handshakeData, callback) {
         // auth simulation routine
         console.dir(handshakeData);
@@ -125,6 +125,11 @@ var logger = io
       });
       
   })
+  .authorization(function (handshakeData, callback) {
+      console.dir(handshakeData);
+      handshakeData.foo = 'baz';
+      callback(null, false);
+  });
 
   // simple object to pass on events - matches our C# object
   function eventLog(obj) {

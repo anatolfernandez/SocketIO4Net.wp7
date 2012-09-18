@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 
@@ -16,7 +17,7 @@ namespace SocketIOClient
 
 		}
 		/// <summary>
-		/// The HearbeatInterval will be approxamately 20% faster than the Socket.IO service indicated was required
+		/// The HearbeatInterval will be approximately 20% faster than the Socket.IO service indicated was required
 		/// </summary>
         public TimeSpan HeartbeatInterval
         {
@@ -28,34 +29,51 @@ namespace SocketIOClient
         public int ConnectionTimeout { get; set; }
         public List<string> Transports = new List<string>();
 
+		public NameValueCollection Headers;
+
 		public SocketIOHandshake()
 		{
-
+			this.Headers = new NameValueCollection();
 		}
-        public static SocketIOHandshake LoadFromString(string value)
+		public SocketIOHandshake(NameValueCollection headers)
+		{
+			if (headers == null)
+				this.Headers = new NameValueCollection();
+			else
+				this.Headers = headers;
+		}
+
+		public void ResetConnection()
+		{
+			this.SID = string.Empty;
+			this.ErrorMessage = string.Empty;
+		}
+		/// <summary>
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public void UpdateFromSocketIOResponse(string value)
         {
-            SocketIOHandshake returnItem = new SocketIOHandshake();
             if (!string.IsNullOrEmpty(value))
             {
+				this.ErrorMessage = string.Empty;
                 string[] items = value.Split(new char[] { ':' });
                 if (items.Count() == 4)
                 {
                     int hb = 0;
                     int ct = 0;
-                    returnItem.SID = items[0];
+                    this.SID = items[0];
 
                     if (int.TryParse(items[1], out hb))
                     { 
-                        var pct = (int)(hb * .75);  // setup client time to occure 25% faster than needed
-                        returnItem.HeartbeatTimeout = pct;
+                        var pct = (int)(hb * .75);  // setup client time to occur 25% faster than needed
+						this.HeartbeatTimeout = pct;
                     }
                     if (int.TryParse(items[2], out ct))
-                        returnItem.ConnectionTimeout = ct;
-                    returnItem.Transports.AddRange(items[3].Split(new char[] { ',' }));
-                    return returnItem;
+						this.ConnectionTimeout = ct;
+					this.Transports.AddRange(items[3].Split(new char[] { ',' }));
                 }
             }
-            return null;
         }
     }
 }

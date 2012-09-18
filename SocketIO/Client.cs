@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -87,7 +88,8 @@ namespace SocketIOClient
 		/// <summary>
 		/// Represents the initial handshake parameters received from the socket.io service (SID, HeartbeatTimeout etc)
 		/// </summary>
-		public SocketIOHandshake HandShake { get; private set; }
+		public SocketIOHandshake HandShake {get;private set;}
+		
 
 		/// <summary>
 		/// Returns boolean of ReadyState == WebSocketState.Open
@@ -119,18 +121,25 @@ namespace SocketIOClient
 			: this(url, WebSocketVersion.Rfc6455)
 		{
 		}
-
+		public Client(string url, NameValueCollection headers)
+			: this(url, WebSocketVersion.Rfc6455, headers)
+		{
+		}
 		public Client(string url, WebSocketVersion socketVersion)
+			: this(url, WebSocketVersion.Rfc6455, null)
+		{
+		}
+		public Client(string url, WebSocketVersion socketVersion, NameValueCollection headers)
 		{
 			this.uri = new Uri(url);
 
 			this.socketVersion = socketVersion;
+			this.HandShake = new SocketIOHandshake(headers);
 
 			this.registrationManager = new RegistrationManager();
 			this.outboundQueue = new BlockingCollection<string>(new ConcurrentQueue<string>());
 			this.dequeuOutBoundMsgTask = Task.Factory.StartNew(() => dequeuOutboundMessages(), TaskCreationOptions.LongRunning);
 		}
-
 		/// <summary>
 		/// Initiate the connection with Socket.IO service
 		/// </summary>
@@ -143,9 +152,9 @@ namespace SocketIOClient
 					try
 					{
 						this.ConnectionOpenEvent.Reset();
-						this.HandShake = this.requestHandshake(uri);// perform an initial HTTP request as a new, non-handshaken connection
+						this.requestHandshake(uri);// perform an initial HTTP request as a new, non-handshaken connection
 
-						if (this.HandShake == null || string.IsNullOrWhiteSpace(this.HandShake.SID) || this.HandShake.HadError)
+						if (string.IsNullOrWhiteSpace(this.HandShake.SID) || this.HandShake.HadError)
 						{
 							this.LastErrorMessage = string.Format("Error initializing handshake with {0}", uri.ToString());
 							this.OnErrorEvent(this, new ErrorEventArgs(this.LastErrorMessage, new Exception()));
@@ -167,6 +176,7 @@ namespace SocketIOClient
 							this.wsClient.Open();
 						}
 					}
+					
 					catch (Exception ex)
 					{
 						Trace.WriteLine(string.Format("Connect threw an exception...{0}", ex.Message));
@@ -191,6 +201,7 @@ namespace SocketIOClient
 
 			this.closeHeartBeatTimer(); // stop the heartbeat time
 			this.closeWebSocketClient();// stop websocket
+			this.HandShake.ResetConnection();
 
 			this.Connect();
 
@@ -582,36 +593,65 @@ namespace SocketIOClient
 		/// <param name="uri">http://localhost:3000</param>
 		/// <returns>Handshake object with sid value</returns>
 		/// <example>DownloadString: 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling</example>
-		protected SocketIOHandshake requestHandshake(Uri uri)
+		protected void requestHandshake(Uri uri)
 		{
 			string value = string.Empty;
 			string errorText = string.Empty;
-			SocketIOHandshake handshake = null;
 
 			using (WebClient client = new WebClient())
-			{ 
+			{
 				try
 				{
+					if (this.HandShake.Headers.Count > 0)
+						client.Headers.Add(this.HandShake.Headers);
 					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/{3}", uri.Scheme, uri.Host, uri.Port, uri.Query)); // #5 tkiley: The uri.Query is available in socket.io's handshakeData object during authorization
 					// 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
 					if (string.IsNullOrEmpty(value))
-						errorText = "Did not receive handshake string from server";
+						errorText = "Did not receive handshake from server";
+				}
+				catch (WebException webEx)
+				{
+					Trace.WriteLine(string.Format("Handshake threw an exception...{0}", webEx.Message));
+					switch (webEx.Status)
+					{
+						case WebExceptionStatus.ConnectFailure:
+							errorText = string.Format("Unable to contact the server: {0}", webEx.Status);
+							break;
+						case WebExceptionStatus.NameResolutionFailure:
+							errorText = string.Format("Unable to resolve address: {0}", webEx.Status);
+							break;
+						case WebExceptionStatus.ProtocolError:
+							var resp = webEx.Response as HttpWebResponse;//((System.Net.HttpWebResponse)(webEx.Response))
+							if (resp != null)
+							{
+								switch (resp.StatusCode)
+								{
+									case HttpStatusCode.Forbidden:
+										errorText = "Socket.IO Handshake Authorization failed";
+										break;
+									default:
+										errorText = string.Format("Handshake response status code: {0}", resp.StatusCode);
+										break;
+								}
+							}
+							else
+								errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", webEx.Message);
+							break;
+						default:
+							errorText = string.Format("Handshake threw an exception...{0}", webEx.Message);
+							break;
+					}
 				}
 				catch (Exception ex)
 				{
-					errorText = string.Format("Error getting handsake from Socket.IO host instance: {0}", ex.Message);
+					errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", ex.Message);
 					//this.OnErrorEvent(this, new ErrorEventArgs(errMsg));
 				}
 			}
 			if (string.IsNullOrEmpty(errorText))
-				handshake = SocketIOHandshake.LoadFromString(value);
+				this.HandShake.UpdateFromSocketIOResponse(value);
 			else
-			{
-				handshake = new SocketIOHandshake();
-				handshake.ErrorMessage = errorText;
-			}
-
-			return handshake;
+				this.HandShake.ErrorMessage = errorText;
 		}
 
 		public void Dispose()

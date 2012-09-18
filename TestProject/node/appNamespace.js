@@ -1,6 +1,6 @@
 ﻿// SocketIO4Net - nodejs SocketIO Server
-// version: v0.5.17
-// node.exe v0.6.7
+// version: v0.7.5
+// node.exe v0.8.9
 
 // require command-line options to start this application
 var argv = require('optimist')
@@ -8,24 +8,33 @@ var argv = require('optimist')
     .demand(['host', 'port'])
     .argv;
 
-var express = require('express')
-  , server = express.createServer()
-  , socketio = require('socket.io')
+// require command-line options to start this application
+var http = require('http'),
+    express = require('express'),
+    app = express(),
+    socketio = require('socket.io');
 
 // configure Express
-server.configure(function () {
-    server.use(express.bodyParser());
-    server.use('/content', express.static(__dirname + '/content'));
-    server.use('/scripts', express.static(__dirname + '/scripts'));
+app.configure(function () {
+    app.use(express.bodyParser());
+    app.use('/content', express.static(__dirname + '/content'));
+    app.use('/scripts', express.static(__dirname + '/scripts'));
 });
 
 // start server listening at host:port
-server.listen(argv.port, argv.host); // http listen on host:port e.g. http://localhost:3000/
+var server = http.createServer(app).listen(argv.port, argv.host);
 
 // configure Socket.IO
 var io = socketio.listen(server); // start socket.io
-io.set('log level', 1);
 
+io.configure(function () {
+    io.set('log level', 4),
+    io.set('authorization', function (handshakeData, callback) {
+        // auth simulation routine
+        console.dir(handshakeData);
+        callback(null, true); // error first callback style
+    });
+});
 
 console.log('');
 console.log('Nodejs Version: ', process.version);
@@ -36,7 +45,7 @@ console.log('');
 //    WEB Handlers  
 //    Express guid: http://expressjs.com/guide.html
 // ***************************************************************
-server.get('/', function (req, res) {
+app.get('/', function (req, res) {
     res.sendfile(__dirname + '/appNamespace.html');
 });
 
@@ -68,19 +77,24 @@ var chat = io
       */
   });
 
-  var news = io
-  .of('/news')
-  .on('connection', function (socket) {
-      console.log('client connected to [news] namespace');
-      // socket.emit('item', { news: 'item' });
+var news = io
+.of('/news')
+.on('connection', function (socket) {
+    console.log('client connected to [news] namespace');
+    // socket.emit('item', { news: 'item' });
 
-      socket.on('disconnect', function () {
-          console.log('client disconnected from [news] namespace');
-      });
-      socket.on('killme', function () {
-          socket.disconnect();
-      });
-  });
+    socket.on('disconnect', function () {
+        console.log('client disconnected from [news] namespace');
+    });
+    socket.on('killme', function () {
+        socket.disconnect();
+    });
+})
+.authorization(function (handshakeData, callback) {
+    console.dir(handshakeData);
+    handshakeData.foo = 'baz';
+    callback(null, true);
+});
 
  
   

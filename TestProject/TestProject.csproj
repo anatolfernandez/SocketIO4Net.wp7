@@ -103,6 +103,8 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="node\install_node_modules.bat" />
+    <None Include="node\package.json" />
     <None Include="node\startNamespace.bat" />
     <None Include="node\startEvents.bat" />
     <None Include="packages.config" />
@@ -117,6 +119,9 @@
   <ItemGroup>
     <Content Include="node\appEvents.js" />
     <Content Include="node\appEventsClient.html" />
+    <Content Include="node\appNamespace.html" />
+    <Content Include="node\appNamespace.js" />
+    <Content Include="node\namespace.html" />
     <Content Include="node\scripts\client.js" />
     <Content Include="node\scripts\dump.js" />
   </ItemGroup>
