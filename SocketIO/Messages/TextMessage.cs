@@ -32,8 +32,8 @@ namespace SocketIOClient.Messages
             //   3:1::blabla
 			msg.RawMessage = rawMessage;
 
-            string[] args = rawMessage.Split(SPLITCHARS, 4);
-			if (args.Length == 4)
+            IList<string> args = rawMessage.Split(Separator, 4);
+			if (args.Count == 4)
 			{
 				int id;
 				if (int.TryParse(args[1], out id))

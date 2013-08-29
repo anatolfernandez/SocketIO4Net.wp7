@@ -35,8 +35,8 @@ namespace SocketIOClient.Messages
 			//  0::/test
 			msg.RawMessage = rawMessage;
 
-			string[] args = rawMessage.Split(SPLITCHARS, 3);
-			if (args.Length == 3)
+			IList<string> args = rawMessage.Split(Separator, 3);
+			if (args.Count == 3)
 			{
 				if (!string.IsNullOrWhiteSpace(args[2]))
 					msg.Endpoint = args[2];

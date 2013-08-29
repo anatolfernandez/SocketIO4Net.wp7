@@ -43,8 +43,8 @@ namespace SocketIOClient.Messages
             //   4:1::{"a":"b"}
 			jsonMsg.RawMessage = rawMessage;
 
-            string[] args = rawMessage.Split(SPLITCHARS, 4); // limit the number of '
-            if (args.Length == 4)
+            IList<string> args = rawMessage.Split(Separator, 4); // limit the number of '
+            if (args.Count == 4)
             {
                 int id;
                 if (int.TryParse(args[1], out id))

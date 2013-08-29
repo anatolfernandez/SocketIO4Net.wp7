@@ -35,8 +35,8 @@ namespace SocketIOClient.Messages
 			//  1::/test?my=param
 			msg.RawMessage = rawMessage;
 
-			string[] args = rawMessage.Split(SPLITCHARS, 3);
-			if (args.Length == 3)
+			IList<string> args = rawMessage.Split(Separator, 3);
+			if (args.Count == 3)
 			{
 				string[] pq = args[2].Split(new char[] { '?' });
 
