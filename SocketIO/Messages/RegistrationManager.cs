@@ -8,6 +8,9 @@ using SocketIOClient.Messages;
 
 namespace SocketIOClient.Eventing
 {
+    extern alias TPL;
+    using TPL.System.Collections.Concurrent;
+
 	public class RegistrationManager : IDisposable
 	{
 		private ConcurrentDictionary<int, Action<dynamic>> callBackRegistry;
