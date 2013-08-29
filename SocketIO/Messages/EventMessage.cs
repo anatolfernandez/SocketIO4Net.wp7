@@ -27,14 +27,14 @@ namespace SocketIOClient.Messages
 			}
 		}
 
-		public Action<dynamic> Callback;
+        public Action<object> Callback;
 
         public EventMessage()
         {
             this.MessageType = SocketIOMessageTypes.Event;
         }
 
-		public EventMessage(string eventName, object jsonObject, string endpoint = "", Action<dynamic> callBack = null)
+        public EventMessage(string eventName, object jsonObject, string endpoint = "", Action<object> callBack = null)
 			: this()
         {
 			this.Callback = callBack;
@@ -55,8 +55,8 @@ namespace SocketIOClient.Messages
 			evtMsg.RawMessage = rawMessage;
 			try
 			{
-				string[] args = rawMessage.Split(SPLITCHARS, 4); // limit the number of pieces
-				if (args.Length == 4)
+				IList<string> args = rawMessage.Split(Separator, 4); // limit the number of pieces
+				if (args.Count == 4)
 				{
 					int id;
 					if (int.TryParse(args[1], out id))
@@ -77,7 +77,7 @@ namespace SocketIOClient.Messages
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine(ex);
+                Debug.WriteLine(ex);
 			}
 			return evtMsg;
         }

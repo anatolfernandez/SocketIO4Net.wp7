@@ -24,8 +24,8 @@ namespace SocketIOClient
 		void On(string eventName, Action<SocketIOClient.Messages.IMessage> action);
 		void On(string eventName, string endPoint, Action<SocketIOClient.Messages.IMessage> action);
 
-		void Emit(string eventName, dynamic payload);
-		void Emit(string eventName, dynamic payload, string endPoint = "", Action<dynamic> callBack = null);
+        void Emit(string eventName, object payload);
+        void Emit(string eventName, object payload, string endPoint = "", Action<object> callBack = null);
 		
 		void Send(SocketIOClient.Messages.IMessage msg);
 		//void Send(string rawEncodedMessageText);

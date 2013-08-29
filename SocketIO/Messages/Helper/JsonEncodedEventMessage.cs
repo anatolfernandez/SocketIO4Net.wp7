@@ -13,7 +13,7 @@ namespace SocketIOClient.Messages
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "args")]
-        public dynamic[] Args { get; set; }
+        public object[] Args { get; set; }
 
         public JsonEncodedEventMessage()
         {
@@ -50,7 +50,7 @@ namespace SocketIOClient.Messages
             List<T> items = new List<T>();
             foreach (var i in this.Args)
             {
-                items.Add( JsonConvert.DeserializeObject<T>(i.ToString(Formatting.None)) );
+                items.Add( JsonConvert.DeserializeObject<T>(i.ToString()) );
             }
             return items.AsEnumerable();
         }
@@ -66,7 +66,7 @@ namespace SocketIOClient.Messages
 			try { msg = JsonConvert.DeserializeObject<JsonEncodedEventMessage>(jsonString); }
 			catch (Exception ex)
 			{
-				Trace.WriteLine(ex);
+                Debug.WriteLine(ex);
 			}
             return msg;
         }
