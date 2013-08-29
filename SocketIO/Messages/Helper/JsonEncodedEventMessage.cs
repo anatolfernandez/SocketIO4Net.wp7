@@ -50,7 +50,7 @@ namespace SocketIOClient.Messages
             List<T> items = new List<T>();
             foreach (var i in this.Args)
             {
-                items.Add( JsonConvert.DeserializeObject<T>(i.ToString(Formatting.None)) );
+                items.Add( JsonConvert.DeserializeObject<T>(i.ToString()) );
             }
             return items.AsEnumerable();
         }

@@ -55,8 +55,8 @@ namespace SocketIOClient.Messages
 			evtMsg.RawMessage = rawMessage;
 			try
 			{
-				string[] args = rawMessage.Split(SPLITCHARS, 4); // limit the number of pieces
-				if (args.Length == 4)
+				IList<string> args = rawMessage.Split(Separator, 4); // limit the number of pieces
+				if (args.Count == 4)
 				{
 					int id;
 					if (int.TryParse(args[1], out id))

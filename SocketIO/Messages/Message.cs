@@ -15,7 +15,7 @@ namespace SocketIOClient.Messages
     public abstract class Message : IMessage
     {
         private static Regex re = new Regex(@"\d:\d?:\w?:");
-        public  static char[] SPLITCHARS = new char[] { ':' };
+        public  static char Separator = ':';
 
 		public string RawMessage { get; protected set; }
 
@@ -104,8 +104,8 @@ namespace SocketIOClient.Messages
 
             this.RawMessage = rawMessage;
 
-            string[] args = rawMessage.Split(SPLITCHARS, 4);
-            if (args.Length == 4)
+            IList<string> args = rawMessage.Split(Separator, 4);
+            if (args.Count == 4)
             {
                 int id;
                 if (int.TryParse(args[1], out id))
@@ -143,7 +143,7 @@ namespace SocketIOClient.Messages
 					case '8':
 						return new NoopMessage();
 					default:
-                        Debug.WriteLine(string.Format("Message.Factory undetermined message: {0}", rawMessage));
+						Debug.WriteLine(string.Format("Message.Factory undetermined message: {0}", rawMessage));
 						return new TextMessage();
 				}
 			}

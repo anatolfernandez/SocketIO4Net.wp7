@@ -44,8 +44,8 @@ namespace SocketIOClient.Messages
 			//	 6:::4+["A","B"]
 			msg.RawMessage = rawMessage;
 
-            string[] args = rawMessage.Split(SPLITCHARS, 4);
-            if (args.Length == 4)
+            IList<string> args = rawMessage.Split(Separator, 4);
+            if (args.Count == 4)
             {
 				msg.Endpoint = args[2];
                 int id;

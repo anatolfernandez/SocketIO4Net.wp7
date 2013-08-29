@@ -81,6 +81,8 @@
     <Compile Include="Messages\RegistrationManager.cs" />
     <Compile Include="Messages\TextMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringSplitHelper.cs" />
+    <Compile Include="SyncWebClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SocketIOClient.csproj" />
