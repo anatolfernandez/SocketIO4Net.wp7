@@ -66,7 +66,7 @@ namespace SocketIOClient.Messages
 			try { msg = JsonConvert.DeserializeObject<JsonEncodedEventMessage>(jsonString); }
 			catch (Exception ex)
 			{
-				Trace.WriteLine(ex);
+                Debug.WriteLine(ex);
 			}
             return msg;
         }

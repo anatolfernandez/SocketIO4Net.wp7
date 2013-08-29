@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using SocketIOClient.Eventing;
@@ -177,7 +178,7 @@ namespace SocketIOClient
 					
 					catch (Exception ex)
 					{
-						Trace.WriteLine(string.Format("Connect threw an exception...{0}", ex.Message));
+                        Debug.WriteLine(string.Format("Connect threw an exception...{0}", ex.Message));
 						this.OnErrorEvent(this, new ErrorEventArgs("SocketIO.Client.Connect threw an exception", ex));
 					}
 				}
@@ -204,7 +205,7 @@ namespace SocketIOClient
 			this.Connect();
 
 			bool connected = this.ConnectionOpenEvent.WaitOne(4000); // block while waiting for connection
-			Trace.WriteLine(string.Format("\tRetry-Connection successful: {0}", connected));
+            Debug.WriteLine(string.Format("\tRetry-Connection successful: {0}", connected));
 			if (connected)
 				this.retryConnectionCount = 0;
 			else
@@ -337,7 +338,7 @@ namespace SocketIOClient
 			var handler = this.Message;
 			if (handler != null && !skip)
 			{
-				Trace.WriteLine(string.Format("webSocket_OnMessage: {0}", msg.RawMessage));
+                Debug.WriteLine(string.Format("webSocket_OnMessage: {0}", msg.RawMessage));
 				handler(this, new MessageEventArgs(msg));
 			}
 		}
@@ -398,7 +399,7 @@ namespace SocketIOClient
 				if (this.wsClient.State == WebSocketState.Connecting || this.wsClient.State == WebSocketState.Open)
 				{
 					try { this.wsClient.Close(); }
-					catch { Trace.WriteLine("exception raised trying to close websocket: can safely ignore, socket is being closed"); }
+					catch { Debug.WriteLine("exception raised trying to close websocket: can safely ignore, socket is being closed"); }
 				}
 				this.wsClient = null;
 			}
@@ -414,7 +415,7 @@ namespace SocketIOClient
 			if (this.Opened != null)
 			{
 				try { this.Opened(this, EventArgs.Empty); }
-				catch (Exception ex) { Trace.WriteLine(ex); }
+				catch (Exception ex) { Debug.WriteLine(ex); }
 			}
 
 		}
@@ -431,7 +432,7 @@ namespace SocketIOClient
 			IMessage iMsg = SocketIOClient.Messages.Message.Factory(e.Message);
 
 			if (iMsg.Event == "responseMsg")
-				Trace.WriteLine(string.Format("InvokeOnEvent: {0}", iMsg.RawMessage));
+                Debug.WriteLine(string.Format("InvokeOnEvent: {0}", iMsg.RawMessage));
 
 			switch (iMsg.MessageType)
 			{
@@ -454,7 +455,7 @@ namespace SocketIOClient
 					this.registrationManager.InvokeCallBack(iMsg.AckId, iMsg.Json);
 					break;
 				default:
-					Trace.WriteLine("unknown wsClient message Received...");
+                    Debug.WriteLine("unknown wsClient message Received...");
 					break;
 			}
 		}
@@ -491,7 +492,7 @@ namespace SocketIOClient
 				try { this.Error.Invoke(this, e); }
 				catch { }
 			}
-			Trace.WriteLine(string.Format("Error Event: {0}\r\n\t{1}", e.Message, e.Exception));
+            Debug.WriteLine(string.Format("Error Event: {0}\r\n\t{1}", e.Message, e.Exception));
 		}
 		protected void OnSocketConnectionClosedEvent(object sender, EventArgs e)
 		{
@@ -500,16 +501,16 @@ namespace SocketIOClient
 					try { this.SocketConnectionClosed(sender, e); }
 					catch { }
 				}
-			Trace.WriteLine("SocketConnectionClosedEvent");
+            Debug.WriteLine("SocketConnectionClosedEvent");
 		}
 		protected void OnConnectionRetryAttemptEvent(object sender, EventArgs e)
 		{
 			if (this.ConnectionRetryAttempt != null)
 			{
 				try { this.ConnectionRetryAttempt(sender, e); }
-				catch (Exception ex) { Trace.WriteLine(ex); }
+				catch (Exception ex) { Debug.WriteLine(ex); }
 			}
-			Trace.WriteLine(string.Format("Attempting to reconnect: {0}", this.retryConnectionCount));
+            Debug.WriteLine(string.Format("Attempting to reconnect: {0}", this.retryConnectionCount));
 		}
 
 		// Housekeeping
@@ -532,7 +533,7 @@ namespace SocketIOClient
 				catch(Exception ex)
 				{
 					// 
-					Trace.WriteLine(string.Format("OnHeartBeatTimerCallback Error Event: {0}\r\n\t{1}", ex.Message, ex.InnerException));
+                    Debug.WriteLine(string.Format("OnHeartBeatTimerCallback Error Event: {0}\r\n\t{1}", ex.Message, ex.InnerException));
 				}
 			}
 		}
@@ -548,7 +549,7 @@ namespace SocketIOClient
 			catch
 			{
 				// Handle any exceptions that were thrown by the invoked method
-				Trace.WriteLine("An event listener went kaboom!");
+                Debug.WriteLine("An event listener went kaboom!");
 			}
 		}
 		/// <summary>
@@ -573,7 +574,7 @@ namespace SocketIOClient
 					}
 					catch(Exception ex)
 					{
-						Trace.WriteLine("The outboundQueue is no longer open...");
+                        Debug.WriteLine("The outboundQueue is no longer open...");
 					}
 				}
 				else
@@ -609,7 +610,7 @@ namespace SocketIOClient
 				}
 				catch (WebException webEx)
 				{
-					Trace.WriteLine(string.Format("Handshake threw an exception...{0}", webEx.Message));
+                    Debug.WriteLine(string.Format("Handshake threw an exception...{0}", webEx.Message));
 					switch (webEx.Status)
 					{
 						case WebExceptionStatus.ConnectFailure:

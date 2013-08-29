@@ -77,7 +77,7 @@ namespace SocketIOClient.Messages
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine(ex);
+                Debug.WriteLine(ex);
 			}
 			return evtMsg;
         }
