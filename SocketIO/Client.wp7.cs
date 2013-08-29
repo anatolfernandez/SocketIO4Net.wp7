@@ -266,7 +266,7 @@ namespace SocketIOClient
 			{
 				case "message":
 					if (payload is string)
-						msg = new TextMessage() { MessageText = payload };
+						msg = new TextMessage() { MessageText = payload.ToString() };
 					else
 						msg = new JSONMessage(payload);
 					this.Send(msg);
@@ -525,7 +525,7 @@ namespace SocketIOClient
 						this.outboundQueue.Add(msg.Encoded);
 						if (this.HeartBeatTimerEvent != null)
 						{
-							this.HeartBeatTimerEvent.BeginInvoke(this, EventArgs.Empty, EndAsyncEvent, null);
+                            //this.HeartBeatTimerEvent.BeginInvoke(this, EventArgs.Empty, EndAsyncEvent, HeartBeatTimerEvent);
 						}
 					}
 				}
@@ -538,8 +538,7 @@ namespace SocketIOClient
 		}
 		private void EndAsyncEvent(IAsyncResult result)
 		{
-			var ar = (System.Runtime.Remoting.Messaging.AsyncResult)result;
-			var invokedMethod = (EventHandler)ar.AsyncDelegate;
+            var invokedMethod = (EventHandler)result.AsyncState;
 
 			try
 			{
