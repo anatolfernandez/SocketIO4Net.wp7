@@ -13,7 +13,7 @@ namespace SocketIOClient.Eventing
 
 	public class RegistrationManager : IDisposable
 	{
-		private ConcurrentDictionary<int, Action<dynamic>> callBackRegistry;
+		private ConcurrentDictionary<int, Action<object>> callBackRegistry;
 		private ConcurrentDictionary<string, Action<IMessage>> eventNameRegistry;
 
 		public RegistrationManager()
@@ -28,7 +28,7 @@ namespace SocketIOClient.Eventing
 			if (eventMessage != null)
 				this.callBackRegistry.AddOrUpdate(eventMessage.AckId.Value, eventMessage.Callback, (key, oldValue) => eventMessage.Callback);
 		}
-		public void AddCallBack(int ackId, Action<dynamic> callback)
+        public void AddCallBack(int ackId, Action<object> callback)
 		{
 			this.callBackRegistry.AddOrUpdate(ackId, callback, (key, oldValue) => callback);
 		}

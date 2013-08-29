@@ -27,14 +27,14 @@ namespace SocketIOClient.Messages
 			}
 		}
 
-		public Action<dynamic> Callback;
+        public Action<object> Callback;
 
         public EventMessage()
         {
             this.MessageType = SocketIOMessageTypes.Event;
         }
 
-		public EventMessage(string eventName, object jsonObject, string endpoint = "", Action<dynamic> callBack = null)
+        public EventMessage(string eventName, object jsonObject, string endpoint = "", Action<object> callBack = null)
 			: this()
         {
 			this.Callback = callBack;

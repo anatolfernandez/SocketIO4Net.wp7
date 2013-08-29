@@ -257,7 +257,7 @@ namespace SocketIOClient
 		/// <param name="eventName"></param>
 		/// <param name="payload">must be a string or a Json Serializable object</param>
 		/// <remarks>ArgumentOutOfRangeException will be thrown on reserved event names</remarks>
-		public void Emit(string eventName, dynamic payload, string endPoint = "", Action<dynamic> callback = null)
+        public void Emit(string eventName, object payload, string endPoint = "", Action<object> callback = null)
 		{
 
 			string lceventName = eventName.ToLower();
@@ -299,7 +299,7 @@ namespace SocketIOClient
 		/// </summary>
 		/// <param name="eventName"></param>
 		/// <param name="payload">must be a string or a Json Serializable object</param>
-		public void Emit(string eventName, dynamic payload)
+        public void Emit(string eventName, object payload)
 		{
 			this.Emit(eventName, payload, string.Empty, null);
 		}

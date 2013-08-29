@@ -30,7 +30,7 @@ namespace SocketIOClient
 			this.Client.On(eventName, this.EndPoint, action);
 		}
 
-		public void Emit(string eventName, dynamic payload, Action<dynamic> callBack = null)
+        public void Emit(string eventName, object payload, Action<object> callBack = null)
 		{
 			this.Client.Emit(eventName, payload, this.EndPoint, callBack);
 		}

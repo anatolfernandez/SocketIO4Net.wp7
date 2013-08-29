@@ -13,7 +13,7 @@ namespace SocketIOClient.Messages
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "args")]
-        public dynamic[] Args { get; set; }
+        public object[] Args { get; set; }
 
         public JsonEncodedEventMessage()
         {

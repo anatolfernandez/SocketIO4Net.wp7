@@ -28,7 +28,7 @@ namespace SocketIOClient.Messages
 			}
 		}
 
-		public Action<dynamic> Callback;
+        public Action<object> Callback;
 
 		public AckMessage()
 			: base()
