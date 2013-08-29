@@ -163,8 +163,7 @@ namespace SocketIOClient
 							string wsScheme = (uri.Scheme == Uri.UriSchemeHttps ? "wss" : "ws");
 							this.wsClient = new WebSocket(
 								string.Format("{0}://{1}:{2}/socket.io/1/websocket/{3}", wsScheme, uri.Host, uri.Port, this.HandShake.SID),
-								string.Empty,
-								this.socketVersion);
+								version: this.socketVersion);
 							this.wsClient.EnableAutoSendPing = false; // #4 tkiley: Websocket4net client library initiates a websocket heartbeat, causes delivery problems
 							this.wsClient.Opened += this.wsClient_OpenEvent;
 							this.wsClient.MessageReceived += this.wsClient_MessageReceived;
