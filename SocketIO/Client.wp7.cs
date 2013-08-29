@@ -595,60 +595,59 @@ namespace SocketIOClient
 			string value = string.Empty;
 			string errorText = string.Empty;
 
-			using (WebClient client = new WebClient())
-			{
-				try
-				{
-					if (this.HandShake.Headers.Count > 0)
-						client.Headers.Add(this.HandShake.Headers);
-					value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/{3}", uri.Scheme, uri.Host, uri.Port, uri.Query)); // #5 tkiley: The uri.Query is available in socket.io's handshakeData object during authorization
-					// 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
-					if (string.IsNullOrEmpty(value))
-						errorText = "Did not receive handshake from server";
-				}
-				catch (WebException webEx)
-				{
-                    Debug.WriteLine(string.Format("Handshake threw an exception...{0}", webEx.Message));
-					switch (webEx.Status)
-					{
-						case WebExceptionStatus.ConnectFailure:
-							errorText = string.Format("Unable to contact the server: {0}", webEx.Status);
-							break;
-						case WebExceptionStatus.NameResolutionFailure:
-							errorText = string.Format("Unable to resolve address: {0}", webEx.Status);
-							break;
-						case WebExceptionStatus.ProtocolError:
-							var resp = webEx.Response as HttpWebResponse;//((System.Net.HttpWebResponse)(webEx.Response))
-							if (resp != null)
-							{
-								switch (resp.StatusCode)
-								{
-									case HttpStatusCode.Forbidden:
-										errorText = "Socket.IO Handshake Authorization failed";
-										break;
-									default:
-										errorText = string.Format("Handshake response status code: {0}", resp.StatusCode);
-										break;
-								}
-							}
-							else
-								errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", webEx.Message);
-							break;
-						default:
-							errorText = string.Format("Handshake threw an exception...{0}", webEx.Message);
-							break;
-					}
-				}
-				catch (Exception ex)
-				{
-					errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", ex.Message);
-					//this.OnErrorEvent(this, new ErrorEventArgs(errMsg));
-				}
-			}
-			if (string.IsNullOrEmpty(errorText))
-				this.HandShake.UpdateFromSocketIOResponse(value);
-			else
-				this.HandShake.ErrorMessage = errorText;
+
+            try
+            {
+                using (var client = new SyncWebClient())
+                {
+                    client.AddHeaders(this.HandShake.Headers);
+                    value = client.DownloadString(string.Format("{0}://{1}:{2}/socket.io/1/{3}", uri.Scheme, uri.Host, uri.Port, uri.Query)); 
+                    // #5 tkiley: The uri.Query is available in socket.io's handshakeData object during authorization
+                }
+                
+                // 13052140081337757257:15:25:websocket,htmlfile,xhr-polling,jsonp-polling
+                if (string.IsNullOrEmpty(value))
+                    errorText = "Did not receive handshake from server";
+            } catch (WebException webEx)
+            {
+                Debug.WriteLine(string.Format("Handshake threw an exception...{0}", webEx.Message));
+                switch (webEx.Status)
+                {
+                    case WebExceptionStatus.ConnectFailure:
+                        errorText = string.Format("Unable to contact the server: {0}", webEx.Status);
+                        break;
+                    case WebExceptionStatus.NameResolutionFailure:
+                        errorText = string.Format("Unable to resolve address: {0}", webEx.Status);
+                        break;
+                    case WebExceptionStatus.ProtocolError:
+                        var resp = webEx.Response as HttpWebResponse;//((System.Net.HttpWebResponse)(webEx.Response))
+                        if (resp != null)
+                        {
+                            switch (resp.StatusCode)
+                            {
+                                case HttpStatusCode.Forbidden:
+                                    errorText = "Socket.IO Handshake Authorization failed";
+                                    break;
+                                default:
+                                    errorText = string.Format("Handshake response status code: {0}", resp.StatusCode);
+                                    break;
+                            }
+                        } else
+                            errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", webEx.Message);
+                        break;
+                    default:
+                        errorText = string.Format("Handshake threw an exception...{0}", webEx.Message);
+                        break;
+                }
+            } catch (Exception ex)
+            {
+                errorText = string.Format("Error getting handshake from Socket.IO host instance: {0}", ex.Message);
+                //this.OnErrorEvent(this, new ErrorEventArgs(errMsg));
+            }
+            if (string.IsNullOrEmpty(errorText))
+                this.HandShake.UpdateFromSocketIOResponse(value);
+            else
+                this.HandShake.ErrorMessage = errorText;
 		}
 
 		public void Dispose()
